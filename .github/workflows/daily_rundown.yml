@@ -1,0 +1,95 @@
+name: Daily Market Rundown
+
+# ── Schedule ──────────────────────────────────────────────────────────────
+# Runs Mon–Fri at 13:00 UTC = 8:00 AM CT (CDT, UTC-5) / 7:00 AM CST (UTC-6)
+# GitHub Actions uses UTC. CDT is UTC-5 (Mar–Nov), CST is UTC-6 (Nov–Mar).
+# 13:00 UTC covers both: 8 AM CDT in summer, 7 AM CST in winter.
+# Adjust to "0 14 * * 1-5" for strict 8 AM CST in winter if preferred.
+on:
+  schedule:
+    - cron: "0 13 * * 1-5"
+
+  # Allow manual trigger from the GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      date_override:
+        description: "Run for a specific date (YYYY-MM-DD). Leave blank for today."
+        required: false
+        default: ""
+
+# ── Permissions ───────────────────────────────────────────────────────────
+# Needed to push the updated HTML back to the repo
+permissions:
+  contents: write
+
+jobs:
+  rundown:
+    name: Generate & Publish Rundown
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+
+      # ── 1. Checkout ──────────────────────────────────────────────────
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ── 2. Set up Python ─────────────────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ── 3. Install dependencies ───────────────────────────────────────
+      - name: Install dependencies
+        run: pip install openai==1.30.0 jinja2==3.1.4
+
+      # ── 4. Determine run date ─────────────────────────────────────────
+      - name: Set run date
+        id: date
+        run: |
+          if [ -n "${{ github.event.inputs.date_override }}" ]; then
+            echo "RUN_DATE=${{ github.event.inputs.date_override }}" >> $GITHUB_ENV
+          else
+            # Use CT (America/Chicago) date
+            echo "RUN_DATE=$(TZ='America/Chicago' date +%Y-%m-%d)" >> $GITHUB_ENV
+          fi
+          echo "Run date: $RUN_DATE"
+
+      # ── 5. Run the pipeline ───────────────────────────────────────────
+      - name: Run market rundown pipeline
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RUN_DATE: ${{ env.RUN_DATE }}
+        run: python .github/scripts/run_pipeline.py
+
+      # ── 6. Commit and push ────────────────────────────────────────────
+      - name: Commit and push updates
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage all changed/new rundown files
+          git add market_rundown.html
+          git add archive/
+          git add "rundown_${RUN_DATE}.md" 2>/dev/null || true
+
+          # Only commit if there are staged changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Daily rundown ${RUN_DATE}"
+            git push origin main
+            echo "Pushed. GitHub Pages will update in ~30 seconds."
+            echo "Live at: https://rajeev1986.github.io/daily-market-brief/market_rundown.html"
+          fi
+
+      # ── 7. Notify on failure ──────────────────────────────────────────
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Daily Market Rundown pipeline failed for ${RUN_DATE}."
+          echo "Check the Actions log at:"
+          echo "https://github.com/rajeev1986/daily-market-brief/actions"
