@@ -344,7 +344,31 @@ def trim_entries(content: str) -> str:
 # STEP 5 — WRITE archive/YYYY-MM-DD.html
 # ═══════════════════════════════════════════════════════════════════════════
 
-ARCHIVE_CSS = """    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ARCHIVE_FOOTER = """
+  <footer id="page-footer">
+    <p class="footer-disclaimer">
+      <strong>⚠️ For market research and informational purposes only.</strong>
+      This briefing does not constitute financial advice, investment recommendations, or an offer to buy or sell any security.
+      All content is aggregated from publicly available sources and is provided as-is without warranty of accuracy or completeness.
+      Past market performance is not indicative of future results. Always conduct your own due diligence and consult a qualified
+      financial advisor before making any investment decisions.
+    </p>
+    <p class="footer-copy">© 2026 Rajeev Piyare &nbsp;·&nbsp; Daily Market Rundown &nbsp;·&nbsp; All rights reserved.</p>
+  </footer>"""
+
+ARCHIVE_LOGO_SVG = """<svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="18" cy="18" r="17" fill="#1e2330" stroke="#2a2f3d" stroke-width="1.5"/>
+        <rect x="8"  y="20" width="4" height="8"  rx="1" fill="#f75f5f"/>
+        <line x1="10" y1="18" x2="10" y2="20" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="10" y1="28" x2="10" y2="30" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="16" y="14" width="4" height="10" rx="1" fill="#3ecf6e"/>
+        <line x1="18" y1="11" x2="18" y2="14" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="18" y1="24" x2="18" y2="27" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="24" y="11" width="4" height="12" rx="1" fill="#3ecf6e"/>
+        <line x1="26" y1="8"  x2="26" y2="11" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="26" y1="23" x2="26" y2="26" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="10,24 18,17 26,13" stroke="#4f8ef7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.7"/>
+      </svg>"""
     :root {
       --bg:#0d0f14; --surface:#161a22; --surface-alt:#1e2330; --border:#2a2f3d;
       --accent:#4f8ef7; --accent-dim:#2d5299; --green:#3ecf6e; --red:#f75f5f;
@@ -387,6 +411,14 @@ ARCHIVE_CSS = """    *, *::before, *::after { box-sizing: border-box; margin: 0;
     .ratings-table tr:hover td, .calendar-table tr:hover td { background:var(--surface-alt); }
     .ticker-cell { font-family:var(--mono); font-weight:700; color:var(--accent); }
     .warning-banner { background:#3d2e00; border:1px solid #7a5c00; border-radius:var(--radius); padding:10px 16px; margin:12px 20px; font-size:0.88rem; color:var(--yellow); }
+    #page-footer { border-top:1px solid var(--border); background:var(--surface); padding:24px 32px; margin-top:40px; text-align:center; }
+    #page-footer .footer-disclaimer { font-size:0.78rem; color:var(--text-muted); max-width:720px; margin:0 auto 10px; line-height:1.6; }
+    #page-footer .footer-disclaimer strong { color:var(--yellow); }
+    #page-footer .footer-copy { font-size:0.75rem; color:var(--text-muted); font-family:var(--mono); opacity:0.6; }
+    #logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    #logo-text { display:flex; flex-direction:column; line-height:1.2; }
+    #logo-text .logo-title { font-size:1rem; font-weight:700; color:var(--text); }
+    #logo-text .logo-sub { font-size:0.65rem; color:var(--text-muted); font-family:var(--mono); letter-spacing:0.06em; text-transform:uppercase; }
     ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg); }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }"""
 
@@ -395,6 +427,20 @@ def write_archive_page(html_entry: str, iso_date: str, display_date: str) -> Non
     """Write a standalone archive page for this day."""
     archive_dir = REPO_DIR / "archive"
     archive_dir.mkdir(exist_ok=True)
+
+    logo_svg = """<svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="18" cy="18" r="17" fill="#1e2330" stroke="#2a2f3d" stroke-width="1.5"/>
+        <rect x="8"  y="20" width="4" height="8"  rx="1" fill="#f75f5f"/>
+        <line x1="10" y1="18" x2="10" y2="20" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="10" y1="28" x2="10" y2="30" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="16" y="14" width="4" height="10" rx="1" fill="#3ecf6e"/>
+        <line x1="18" y1="11" x2="18" y2="14" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="18" y1="24" x2="18" y2="27" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="24" y="11" width="4" height="12" rx="1" fill="#3ecf6e"/>
+        <line x1="26" y1="8"  x2="26" y2="11" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="26" y1="23" x2="26" y2="26" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="10,24 18,17 26,13" stroke="#4f8ef7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.7"/>
+      </svg>"""
 
     page = f"""<!DOCTYPE html>
 <html lang="en">
@@ -408,7 +454,13 @@ def write_archive_page(html_entry: str, iso_date: str, display_date: str) -> Non
 </head>
 <body>
   <header id="page-header">
-    <h1>📈 Market Rundown — {display_date}</h1>
+    <a href="../market_rundown.html" id="logo">
+      {logo_svg}
+      <div id="logo-text">
+        <span class="logo-title">Market Rundown</span>
+        <span class="logo-sub">Daily Pre-Market Brief</span>
+      </div>
+    </a>
     <nav class="nav-links">
       <a href="index.html">📁 All Archives</a>
       <a href="../market_rundown.html">⬅ Latest</a>
@@ -417,6 +469,16 @@ def write_archive_page(html_entry: str, iso_date: str, display_date: str) -> Non
   <main id="main">
     {html_entry}
   </main>
+  <footer id="page-footer">
+    <p class="footer-disclaimer">
+      <strong>⚠️ For market research and informational purposes only.</strong>
+      This briefing does not constitute financial advice, investment recommendations, or an offer to buy or sell any security.
+      All content is aggregated from publicly available sources and is provided as-is without warranty of accuracy or completeness.
+      Past market performance is not indicative of future results. Always conduct your own due diligence and consult a qualified
+      financial advisor before making any investment decisions.
+    </p>
+    <p class="footer-copy">© 2026 Rajeev Piyare &nbsp;·&nbsp; Daily Market Rundown &nbsp;·&nbsp; All rights reserved.</p>
+  </footer>
 </body>
 </html>"""
 
