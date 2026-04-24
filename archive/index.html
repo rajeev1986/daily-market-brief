@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Rundown — Archive</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#0d0f14; --surface:#161a22; --surface-alt:#1e2330; --border:#2a2f3d;
+      --accent:#4f8ef7; --green:#3ecf6e; --text:#e2e6f0; --text-muted:#7a8299;
+      --radius:8px; --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+      --mono:'Cascadia Code','Fira Code','Consolas',monospace;
+    }
+    body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:15px; line-height:1.6; padding:0 0 60px; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+
+    #page-header {
+      background:var(--surface); border-bottom:1px solid var(--border);
+      padding:20px 32px; display:flex; align-items:center; gap:16px;
+      position:sticky; top:0; z-index:100;
+    }
+    #page-header h1 { font-size:1.3rem; font-weight:700; }
+    #back-link {
+      margin-left:auto; font-size:0.82rem; font-family:var(--mono);
+      background:var(--surface-alt); border:1px solid var(--border);
+      border-radius:5px; padding:5px 12px;
+    }
+    #back-link:hover { background:var(--border); text-decoration:none; }
+
+    #main { max-width:760px; margin:0 auto; padding:40px 24px; }
+
+    .year-group { margin-bottom:40px; }
+    .year-label {
+      font-size:0.75rem; font-family:var(--mono); font-weight:700;
+      text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted);
+      margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);
+    }
+
+    .month-group { margin-bottom:24px; }
+    .month-label {
+      font-size:0.8rem; font-family:var(--mono); color:var(--text-muted);
+      margin-bottom:8px; padding-left:4px;
+    }
+
+    .entry-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+
+    .entry-item {
+      display:flex; align-items:center; gap:14px;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:12px 16px;
+      transition:background 0.15s, border-color 0.15s;
+    }
+    .entry-item:hover { background:var(--surface-alt); border-color:var(--accent); }
+
+    .entry-date {
+      font-family:var(--mono); font-size:0.88rem; font-weight:700;
+      color:var(--accent); white-space:nowrap; min-width:110px;
+    }
+    .entry-dow {
+      font-size:0.78rem; color:var(--text-muted); min-width:70px;
+    }
+    .entry-link {
+      font-size:0.9rem; color:var(--text); flex:1;
+    }
+    .entry-item:hover .entry-link { color:var(--accent); }
+    .entry-badge {
+      font-size:0.7rem; font-family:var(--mono); padding:2px 8px;
+      border-radius:4px; background:#1a3d2b; color:var(--green);
+      white-space:nowrap;
+    }
+
+    .empty-msg {
+      text-align:center; padding:60px 20px; color:var(--text-muted); font-size:0.95rem;
+    }
+
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  </style>
+</head>
+<body>
+
+  <header id="page-header">
+    <h1>📁 Rundown Archive</h1>
+    <a href="../market_rundown.html" id="back-link">⬅ Latest Rundown</a>
+  </header>
+
+  <main id="main">
+
+    <!-- ── 2026 ── -->
+    <div class="year-group">
+      <div class="year-label">2026</div>
+
+      <!-- April 2026 -->
+      <div class="month-group">
+        <div class="month-label">April</div>
+        <ul class="entry-list">
+
+          <!-- NEW ENTRIES ARE PREPENDED HERE — most recent first -->
+
+          <li class="entry-item">
+            <span class="entry-date">2026-04-24</span>
+            <span class="entry-dow">Friday</span>
+            <a class="entry-link" href="2026-04-24.html">INTC +27% on AI earnings blowout · Oil $105 · Mag-7 week ahead</a>
+            <span class="entry-badge">Pre-Market</span>
+          </li>
+
+        </ul>
+      </div>
+
+    </div>
+    <!-- END 2026 -->
+
+  </main>
+
+</body>
+</html>

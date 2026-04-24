@@ -275,6 +275,21 @@
       color: var(--yellow);
     }
 
+    /* ── Archive Link ── */
+    #archive-link {
+      margin-left: auto;
+      font-size: 0.82rem;
+      font-family: var(--mono);
+      color: var(--accent);
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 12px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    #archive-link:hover { background: var(--border); text-decoration: none; }
+
     /* ── Empty State ── */
     #empty-state {
       text-align: center;
@@ -297,6 +312,7 @@
   <header id="page-header">
     <h1>📈 Daily Market Rundown</h1>
     <span id="last-updated">Last updated: Friday, April 24, 2026 — 8:00 AM CT</span>
+    <a href="archive/index.html" id="archive-link">📁 Archive</a>
   </header>
 
   <main id="main">
