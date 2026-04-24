@@ -420,7 +420,33 @@ ARCHIVE_LOGO_SVG = """<svg width="32" height="32" viewBox="0 0 36 36" fill="none
     #logo-text .logo-title { font-size:1rem; font-weight:700; color:var(--text); }
     #logo-text .logo-sub { font-size:0.65rem; color:var(--text-muted); font-family:var(--mono); letter-spacing:0.06em; text-transform:uppercase; }
     ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg); }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }"""
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    @media (max-width: 640px) {
+      #page-header { padding:12px 16px; flex-wrap:wrap; gap:10px; }
+      #logo { flex:1 1 100%; }
+      #logo-text .logo-title { font-size:0.95rem; }
+      #logo-text .logo-sub { display:none; }
+      .nav-links { margin-left:0; width:100%; justify-content:flex-end; }
+      #main { padding:16px 12px; }
+      .rundown-entry-header { flex-direction:column; align-items:flex-start; gap:4px; padding:12px 14px; }
+      .rundown-entry-header h2 { font-size:0.95rem; }
+      summary { padding:11px 14px; font-size:0.82rem; }
+      .section-body { padding:14px 14px; font-size:0.88rem; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+      .ratings-table, .calendar-table { font-size:0.78rem; min-width:480px; }
+      .ratings-table th, .ratings-table td, .calendar-table th, .calendar-table td { padding:6px 8px; }
+      .stock-grid { grid-template-columns:1fr; padding:12px 14px; gap:10px; }
+      .badge { font-size:0.65rem; padding:2px 5px; }
+      .rundown-entry { margin-bottom:24px; }
+      #page-footer { padding:20px 16px; }
+      #page-footer .footer-disclaimer { font-size:0.73rem; }
+      #page-footer .footer-copy { font-size:0.7rem; }
+    }
+    @media (min-width:641px) and (max-width:900px) {
+      #page-header { padding:16px 20px; }
+      #main { padding:24px 16px; }
+      .stock-grid { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+      .section-body { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    }"""
 
 
 def write_archive_page(html_entry: str, iso_date: str, display_date: str) -> None:

@@ -366,6 +366,122 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ════════════════════════════════════════════════════════════════
+       MOBILE — max-width: 640px
+    ════════════════════════════════════════════════════════════════ */
+    @media (max-width: 640px) {
+
+      /* ── Header: stack into two rows ── */
+      #page-header {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      /* Logo takes full first row */
+      #logo { flex: 1 1 100%; }
+
+      #logo-text .logo-title { font-size: 1rem; }
+      #logo-text .logo-sub   { display: none; }  /* hide subtitle on tiny screens */
+
+      /* Timestamp + archive link share second row */
+      #last-updated {
+        font-size: 0.72rem;
+        flex: 1 1 auto;
+        white-space: normal;
+      }
+
+      #archive-link {
+        margin-left: 0;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        flex-shrink: 0;
+      }
+
+      /* ── Main padding ── */
+      #main { padding: 16px 12px; }
+
+      /* ── Entry header: stack date + meta ── */
+      .rundown-entry-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 12px 14px;
+      }
+
+      .rundown-entry-header h2 { font-size: 0.95rem; }
+
+      /* ── Summary: tighter padding ── */
+      summary { padding: 11px 14px; font-size: 0.82rem; }
+
+      /* ── Section body ── */
+      .section-body { padding: 14px 14px; font-size: 0.88rem; }
+
+      /* ── Tables: horizontal scroll wrapper ──
+         Wrap all tables in a scrollable container so they don't
+         break the page layout on narrow screens.               */
+      .ratings-table,
+      .calendar-table {
+        font-size: 0.78rem;
+        min-width: 480px;   /* allow scroll rather than squish */
+      }
+
+      /* Inject scroll wrapper via a parent div trick —
+         we target the section-body to make all its tables scrollable */
+      .section-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .ratings-table th,
+      .ratings-table td,
+      .calendar-table th,
+      .calendar-table td {
+        padding: 6px 8px;
+      }
+
+      /* ── Stock grid: single column ── */
+      .stock-grid {
+        grid-template-columns: 1fr;
+        padding: 12px 14px;
+        gap: 10px;
+      }
+
+      /* ── Warning banner ── */
+      .warning-banner { margin: 10px 14px; font-size: 0.82rem; }
+
+      /* ── Footer ── */
+      #page-footer { padding: 20px 16px; }
+      #page-footer .footer-disclaimer { font-size: 0.73rem; }
+      #page-footer .footer-copy       { font-size: 0.7rem; }
+
+      /* ── Badges: prevent overflow ── */
+      .badge { font-size: 0.65rem; padding: 2px 5px; }
+
+      /* ── Entry margin ── */
+      .rundown-entry { margin-bottom: 24px; }
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       TABLET — 641px–900px  (minor tweaks only)
+    ════════════════════════════════════════════════════════════════ */
+    @media (min-width: 641px) and (max-width: 900px) {
+      #page-header { padding: 16px 20px; }
+      #main { padding: 24px 16px; }
+
+      .stock-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+
+      .ratings-table, .calendar-table { font-size: 0.82rem; }
+
+      .section-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
   </style>
 </head>
 <body>
