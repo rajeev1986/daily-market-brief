@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Market Rundown</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0f14;
+      --surface:     #161a22;
+      --surface-alt: #1e2330;
+      --border:      #2a2f3d;
+      --accent:      #4f8ef7;
+      --accent-dim:  #2d5299;
+      --green:       #3ecf6e;
+      --red:         #f75f5f;
+      --yellow:      #f7c948;
+      --text:        #e2e6f0;
+      --text-muted:  #7a8299;
+      --radius:      8px;
+      --font:        'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono:        'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 0 0 60px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Page Header ── */
+    #page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    #page-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    #last-updated {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    /* ── Main Layout ── */
+    #main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* ── Daily Entry Section ── */
+    .rundown-entry {
+      margin-bottom: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .rundown-entry-header {
+      background: var(--surface-alt);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rundown-entry-header h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+
+    .rundown-entry-header .entry-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Collapsible Sections ── */
+    details {
+      border-bottom: 1px solid var(--border);
+    }
+
+    details:last-child { border-bottom: none; }
+
+    summary {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--surface);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::before {
+      content: '▶';
+      font-size: 0.65rem;
+      color: var(--accent-dim);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { color: var(--text); background: var(--surface-alt); }
+    summary:hover { background: var(--surface-alt); color: var(--text); }
+
+    .section-body {
+      padding: 16px 20px;
+      background: var(--surface);
+    }
+
+    .section-body p { margin-bottom: 10px; color: var(--text); }
+    .section-body p:last-child { margin-bottom: 0; }
+
+    .section-body ul {
+      padding-left: 18px;
+      margin-bottom: 10px;
+    }
+
+    .section-body li { margin-bottom: 6px; }
+
+    /* ── Stock Cards ── */
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--surface);
+    }
+
+    .stock-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+
+    .stock-card .ticker {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stock-card .catalyst {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .stock-card .note {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .badge-up   { background: #1a3d2b; color: var(--green); }
+    .badge-down { background: #3d1a1a; color: var(--red); }
+    .badge-watch { background: #3d3010; color: var(--yellow); }
+
+    /* ── Analyst Table ── */
+    .ratings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .ratings-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--surface-alt);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ratings-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .ratings-table tr:last-child td { border-bottom: none; }
+    .ratings-table tr:hover td { background: var(--surface-alt); }
+
+    .ratings-table .ticker-cell {
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ── Calendar Table ── */
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .calendar-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--surface-alt);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calendar-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calendar-table tr:last-child td { border-bottom: none; }
+    .calendar-table tr:hover td { background: var(--surface-alt); }
+
+    /* ── Warning Banner ── */
+    .warning-banner {
+      background: #3d2e00;
+      border: 1px solid #7a5c00;
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      margin: 12px 20px;
+      font-size: 0.88rem;
+      color: var(--yellow);
+    }
+
+    /* ── Empty State ── */
+    #empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+
+    #empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+    #empty-state p { font-size: 0.95rem; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header id="page-header">
+    <h1>📈 Daily Market Rundown</h1>
+    <span id="last-updated">Last updated: —</span>
+  </header>
+
+  <main id="main">
+    <div id="rundowns">
+
+      <!-- Daily entries are prepended here by Prompt 3 -->
+
+      <div id="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No rundowns yet. Run Prompt 2 + 3 to generate today's briefing.</p>
+      </div>
+
+    </div>
+  </main>
+
+</body>
+</html>
