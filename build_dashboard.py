@@ -12,9 +12,10 @@ import re
 from datetime import datetime
 import markdown
 
-DASHBOARD_FILE = "market_rundown.html"
+# Always write output relative to this script's location (the repo root)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DASHBOARD_FILE = os.path.join(SCRIPT_DIR, "market_rundown.html")
 PLACEHOLDER = "<!-- RUNDOWNS_PLACEHOLDER -->"
-
 DARK_THEME_CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
