@@ -32,13 +32,13 @@ jobs:
 
       # ── 1. Checkout ──────────────────────────────────────────────────
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 1
 
       # ── 2. Set up Python ─────────────────────────────────────────────
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: "3.12"
 
