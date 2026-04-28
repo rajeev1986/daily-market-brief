@@ -44,7 +44,7 @@ jobs:
 
       # ── 3. Install dependencies ───────────────────────────────────────
       - name: Install dependencies
-        run: pip install openai==1.30.0 jinja2==3.1.4
+        run: pip install openai==1.52.0 jinja2==3.1.4 markdown==3.7
 
       # ── 4. Determine run date ─────────────────────────────────────────
       - name: Set run date
