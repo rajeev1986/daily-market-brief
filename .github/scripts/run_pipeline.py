@@ -59,7 +59,7 @@ def search(client: OpenAI, prompt: str) -> str:
     """Call OpenAI Responses API with web_search_preview tool."""
     try:
         response = client.responses.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             tools=[{"type": "web_search_preview"}],
             input=prompt,
         )
@@ -208,7 +208,7 @@ RULES:
 
     log.info("Generating markdown briefing...")
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "system",
@@ -233,61 +233,31 @@ RULES:
 # ═══════════════════════════════════════════════════════════════════════════
 
 def markdown_to_html_entry(client: OpenAI, markdown: str, today: date) -> str:
-    """Use LLM to convert markdown briefing to an HTML entry block."""
+    """Convert markdown briefing to an HTML entry block using local Python converter."""
+    import sys
+    sys.path.insert(0, str(REPO_DIR))
+    from build_dashboard import build_entry_html
+    import tempfile, os
+
     iso_date     = today.isoformat()
     display_date = today.strftime("%A, %B %d, %Y")
     now_et       = datetime.now(ZoneInfo("America/New_York"))
     timestamp_et = now_et.strftime("%-I:%M %p ET")
 
-    prompt = f"""Convert the following markdown market briefing into an HTML entry block.
+    # Write markdown to a temp file so build_entry_html can read it
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=f"_{iso_date}.md", delete=False, encoding="utf-8"
+    ) as tmp:
+        tmp.write(markdown)
+        tmp_path = tmp.name
 
-REQUIREMENTS:
-- Wrap everything in: <section class="rundown-entry" data-date="{iso_date}">
-- Start with this exact header div:
-  <div class="rundown-entry-header">
-    <h2>📅 {display_date}</h2>
-    <span class="entry-meta">Generated {timestamp_et} &nbsp;·&nbsp; Pre-Market</span>
-  </div>
-- Each section uses <details>/<summary>
-- Open Macro Overview and Stocks in Play by default: <details open>
-- All other sections: <details> (closed)
-- Summary format: <summary>EMOJI SECTION NAME IN CAPS</summary>
-  Use these emojis: 🌍 Macro, 📆 Calendar, 📊 Earnings, 🔬 Ratings, 🎯 Stocks, 📈 Themes, 📋 Secondary, 🗓 Week Ahead
-- Wrap section content in: <div class="section-body">
-- Tables: class="ratings-table" for analyst/earnings, class="calendar-table" for calendar/week-ahead
-- Stocks in Play: <div class="stock-grid"> with <div class="stock-card"> cards
-  Each card: <div class="ticker">TICKER</div><div class="catalyst">CATALYST</div><div class="note">NOTE</div>
-- Badges: <span class="badge badge-up">text</span> / badge-down / badge-watch
-- Ticker cells: <td class="ticker-cell">TICKER</td>
-- Source citations: <a href="URL">Source</a> where URL available, else plain italic
-- If ⚠️ warning exists at top of markdown:
-  <div class="warning-banner">⚠️ Incomplete — fewer than 3 data sources returned results</div>
-  Place immediately after the entry header div.
-- Output ONLY the HTML block. No <!DOCTYPE>, <html>, <head>, <body>, no CSS, no explanation.
+    try:
+        log.info("Converting markdown to HTML entry (local converter)...")
+        html = build_entry_html(tmp_path)
+    finally:
+        os.unlink(tmp_path)
 
-MARKDOWN:
-{markdown}"""
-
-    log.info("Converting markdown to HTML entry...")
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are an expert HTML developer. Convert markdown to clean semantic HTML "
-                    "using the exact class names specified. Output only the HTML block."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.1,
-    )
-
-    html = response.choices[0].message.content or ""
-    html = re.sub(r"^```html?\s*", "", html.strip())
-    html = re.sub(r"\s*```$", "", html)
-    return html.strip()
+    return html
 
 
 # ═══════════════════════════════════════════════════════════════════════════
