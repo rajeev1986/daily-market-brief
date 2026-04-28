@@ -356,19 +356,7 @@ ARCHIVE_FOOTER = """
     <p class="footer-copy">© 2026 Rajeev Piyare &nbsp;·&nbsp; Daily Market Rundown &nbsp;·&nbsp; All rights reserved.</p>
   </footer>"""
 
-ARCHIVE_LOGO_SVG = """<svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="18" cy="18" r="17" fill="#1e2330" stroke="#2a2f3d" stroke-width="1.5"/>
-        <rect x="8"  y="20" width="4" height="8"  rx="1" fill="#f75f5f"/>
-        <line x1="10" y1="18" x2="10" y2="20" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="10" y1="28" x2="10" y2="30" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
-        <rect x="16" y="14" width="4" height="10" rx="1" fill="#3ecf6e"/>
-        <line x1="18" y1="11" x2="18" y2="14" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="18" y1="24" x2="18" y2="27" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <rect x="24" y="11" width="4" height="12" rx="1" fill="#3ecf6e"/>
-        <line x1="26" y1="8"  x2="26" y2="11" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="26" y1="23" x2="26" y2="26" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <polyline points="10,24 18,17 26,13" stroke="#4f8ef7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.7"/>
-      </svg>"""
+ARCHIVE_CSS = """
     :root {
       --bg:#0d0f14; --surface:#161a22; --surface-alt:#1e2330; --border:#2a2f3d;
       --accent:#4f8ef7; --accent-dim:#2d5299; --green:#3ecf6e; --red:#f75f5f;
