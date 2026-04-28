@@ -17,6 +17,10 @@ on:
         required: false
         default: ""
 
+# ── Force Node.js 24 for all actions (suppresses Node.js 20 deprecation warning)
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # ── Permissions ───────────────────────────────────────────────────────────
 # Needed to push the updated HTML back to the repo
 permissions:
