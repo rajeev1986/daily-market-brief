@@ -173,27 +173,58 @@ tr:nth-child(even) td {
     background: #1c2128;
     border: 1px solid #30363d;
     border-radius: 6px;
-    padding: 12px 14px;
+    padding: 14px 16px;
+}
+
+.stock-card .ticker-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
 }
 
 .stock-card .ticker {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: #58a6ff;
-    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.stock-card .watchlist-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #2d2a00;
+    color: #d29922;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #5a4a00;
 }
 
 .stock-card .catalyst {
-    font-size: 12px;
-    color: #f0883e;
-    margin-bottom: 6px;
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1.4;
 }
 
 .stock-card .setup {
-    font-size: 12px;
-    color: #8b949e;
-    line-height: 1.5;
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.55;
+}
+
+.stock-card .setup a {
+    color: #58a6ff;
+    font-style: italic;
 }
 
 /* Analyst ratings */
@@ -250,8 +281,6 @@ SECTION_ICONS = {
     "Analyst Ratings": "🎯",
     "Stocks in Play": "⚡",
     "Market Themes": "🔍",
-    "Secondary Names": "📌",
-    "Week Ahead": "🗓️",
 }
 
 SHELL_TEMPLATE = """<!DOCTYPE html>
@@ -317,38 +346,55 @@ def md_to_html(text):
 
 
 def build_stocks_section(md_text):
-    """Render Stocks in Play as cards + prose for non-watchlist movers."""
-    # Split at the non-watchlist divider
+    """Render Stocks in Play as cards matching the target design."""
+    # Split at the non-watchlist divider if present
     parts = re.split(r"\*\*Non-Watchlist Movers:\*\*", md_text, maxsplit=1)
     table_part = parts[0]
     extra_part = parts[1] if len(parts) > 1 else ""
 
-    # Parse the markdown table rows
+    # Parse markdown table rows
     rows = []
-    in_table = False
     for line in table_part.split("\n"):
         if line.startswith("|") and "---" not in line and "Ticker" not in line:
             cells = [c.strip() for c in line.strip("|").split("|")]
             if len(cells) >= 3:
                 rows.append(cells)
-        elif line.startswith("|") and "Ticker" in line:
-            in_table = True
 
     cards_html = '<div class="stocks-grid">'
     for row in rows:
-        ticker = re.sub(r"\*\*(.+?)\*\*", r"\1", row[0])
-        catalyst = re.sub(r"\*\*(.+?)\*\*", r"\1", row[1]) if len(row) > 1 else ""
-        setup = re.sub(r"\*\*(.+?)\*\*", r"\1", row[2]) if len(row) > 2 else ""
+        raw_ticker  = re.sub(r"\*\*(.+?)\*\*", r"\1", row[0]).strip()
+        catalyst    = re.sub(r"\*\*(.+?)\*\*", r"\1", row[1]).strip() if len(row) > 1 else ""
+        setup       = re.sub(r"\*\*(.+?)\*\*", r"\1", row[2]).strip() if len(row) > 2 else ""
+
+        # Detect watchlist flag (⭐ WATCHLIST in ticker cell)
+        is_watchlist = "WATCHLIST" in raw_ticker.upper() or "⭐" in raw_ticker
+        ticker = re.sub(r"[⭐\s]*WATCHLIST", "", raw_ticker, flags=re.IGNORECASE).strip()
+
+        watchlist_html = (
+            '<span class="watchlist-badge">⭐ WATCHLIST</span>'
+            if is_watchlist else ""
+        )
+
+        # Convert *via Source* style citations in setup to italic links
+        setup_html = re.sub(
+            r"\*via ([^*]+)\*",
+            r"<em>via \1</em>",
+            setup
+        )
+
         cards_html += f"""
         <div class="stock-card">
-          <div class="ticker">{ticker}</div>
+          <div class="ticker-row">
+            <span class="ticker">{ticker}</span>
+            {watchlist_html}
+          </div>
           <div class="catalyst">{catalyst}</div>
-          <div class="setup">{setup}</div>
+          <div class="setup">{setup_html}</div>
         </div>"""
     cards_html += "</div>"
 
     if extra_part.strip():
-        cards_html += '<p style="margin-top:14px;font-weight:600;color:#8b949e;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Other Movers</p>'
+        cards_html += '<p style="margin-top:14px;font-weight:600;color:#8b949e;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Other Movers</p>'
         cards_html += md_to_html(extra_part.strip())
 
     return cards_html

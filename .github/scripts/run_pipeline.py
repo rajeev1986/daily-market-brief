@@ -130,20 +130,22 @@ def research(client: OpenAI, today: date) -> dict[str, str]:
     results["market_themes"] = text  # same search, split by LLM at synthesis
 
     # ── Combined search 4: Secondary Names + Week Ahead ───────────────
-    log.info("Researching: secondary_names + week_ahead")
-    text = search(client,
-        f"Today is {date_str}. Search for two things:\n"
-        "1) Stocks with fresh news today that are notable but lower priority movers. "
-        "Include: ticker, brief catalyst, one sentence note. "
-        "Sources: Benzinga, Yahoo Finance, MarketWatch.\n"
-        "2) Key events for the rest of this week and next week: earnings (with dates), "
-        "economic data releases, Fed events, major geopolitical or policy events. "
-        "Format as a list by date. "
-        "Sources: Earnings Whispers, Investing.com calendar, Federal Reserve, CNBC.\n"
-        "Cite sources inline for both."
-    )
-    results["secondary_names"] = text
-    results["week_ahead"] = text  # same search, split by LLM at synthesis
+    # NOTE: Secondary Names and Week Ahead are currently disabled.
+    # Uncomment the block below to re-enable them.
+    # log.info("Researching: secondary_names + week_ahead")
+    # text = search(client,
+    #     f"Today is {date_str}. Search for two things:\n"
+    #     "1) Stocks with fresh news today that are notable but lower priority movers. "
+    #     "Include: ticker, brief catalyst, one sentence note. "
+    #     "Sources: Benzinga, Yahoo Finance, MarketWatch.\n"
+    #     "2) Key events for the rest of this week and next week: earnings (with dates), "
+    #     "economic data releases, Fed events, major geopolitical or policy events. "
+    #     "Format as a list by date. "
+    #     "Sources: Earnings Whispers, Investing.com calendar, Federal Reserve, CNBC.\n"
+    #     "Cite sources inline for both."
+    # )
+    # results["secondary_names"] = text
+    # results["week_ahead"] = text
 
     # Log any empty results
     for name, val in results.items():
@@ -192,23 +194,19 @@ Table: | Ticker | Firm | Action | Rating | Price Target | Note |
 
 ## 5. Stocks in Play
 Primary movers with clear catalysts. Watchlist names first.
-Table or list: Ticker | Catalyst | Why it could move today
+Use this EXACT format — one row per stock:
+| Ticker | Catalyst | Setup |
+Include whether each ticker is on the watchlist by appending ⭐ WATCHLIST to the ticker cell if applicable.
 
 ## 6. Market Themes
 3-4 dominant sector narratives or macro themes.
-
-## 7. Secondary Names
-Bullet list of stocks with fresh news but lower priority.
-
-## 8. Week Ahead
-Key events for the rest of the week.
-Table: | Date | Event/Ticker | Notes |
 
 RULES:
 - Summarize — do not paste research verbatim
 - Cite each major data point inline: *via Source*
 - If a section has no data, write "Nothing notable today."
 - Do not add any text before ## 1. Macro Overview
+- Do NOT include a Week Ahead or Secondary Names section
 
 --- RESEARCH NOTES ---
 {sections}
