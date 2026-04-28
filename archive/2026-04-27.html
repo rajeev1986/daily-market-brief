@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Rundown — April 27, 2026</title>
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #58a6ff;
+    letter-spacing: 0.5px;
+}
+
+#last-updated {
+    font-size: 12px;
+    color: #8b949e;
+}
+
+#rundowns {
+    max-width: 1100px;
+    margin: 32px auto;
+    padding: 0 24px;
+}
+
+.rundown-entry {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+.entry-header {
+    background: #1c2128;
+    padding: 14px 24px;
+    border-bottom: 1px solid #30363d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.entry-date {
+    font-size: 16px;
+    font-weight: 600;
+    color: #58a6ff;
+}
+
+.entry-meta {
+    font-size: 12px;
+    color: #8b949e;
+}
+
+.entry-body {
+    padding: 0 24px 24px;
+}
+
+details {
+    border-bottom: 1px solid #21262d;
+    padding: 0;
+}
+
+details:last-child {
+    border-bottom: none;
+}
+
+summary {
+    padding: 14px 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #c9d1d9;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+
+summary::-webkit-details-marker { display: none; }
+
+summary::before {
+    content: '▶';
+    font-size: 10px;
+    color: #58a6ff;
+    transition: transform 0.2s;
+    display: inline-block;
+    width: 14px;
+}
+
+details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.section-content {
+    padding: 4px 0 16px 22px;
+    color: #c9d1d9;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 13px;
+}
+
+th {
+    background: #1c2128;
+    color: #8b949e;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid #30363d;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 8px 12px;
+    border: 1px solid #21262d;
+    vertical-align: top;
+}
+
+tr:nth-child(even) td {
+    background: #1c2128;
+}
+
+/* Stock cards */
+.stocks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.stock-card {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+.stock-card .ticker {
+    font-size: 15px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 4px;
+}
+
+.stock-card .catalyst {
+    font-size: 12px;
+    color: #f0883e;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.stock-card .setup {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+}
+
+/* Analyst ratings */
+.rating-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.rating-upgrade { background: #1a4731; color: #3fb950; }
+.rating-downgrade { background: #4a1a1a; color: #f85149; }
+.rating-initiate { background: #1a3a5c; color: #58a6ff; }
+.rating-hold { background: #2d2a1a; color: #d29922; }
+
+/* Inline elements */
+strong { color: #e6edf3; }
+em { color: #8b949e; font-style: normal; font-size: 12px; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+p { margin: 6px 0; }
+ul { padding-left: 20px; margin: 6px 0; }
+li { margin: 4px 0; }
+code { background: #1c2128; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #f0883e; }
+
+/* Badges */
+.badge-up { color: #3fb950; font-weight: 600; }
+.badge-down { color: #f85149; font-weight: 600; }
+.badge-flat { color: #d29922; font-weight: 600; }
+
+/* Warning banner */
+.warning-banner {
+    background: #2d1f00;
+    border: 1px solid #d29922;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 16px 0;
+    color: #d29922;
+    font-size: 13px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #58a6ff;
+}
+.nav-links { display:flex; gap:12px; font-size:13px; font-family:monospace; }
+.nav-links a { background:#1c2128; border:1px solid #30363d; border-radius:5px; padding:5px 12px; color:#58a6ff; text-decoration:none; }
+.nav-links a:hover { background:#30363d; }
+#rundowns { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+footer { border-top:1px solid #30363d; background:#161b22; padding:24px 32px; margin-top:40px; text-align:center; font-size:12px; color:#8b949e; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📈 Market Rundown — April 27, 2026</h1>
+  <div class="nav-links">
+    <a href="../market_rundown.html">⬅ Latest</a>
+    <a href="index.html">📁 Archive</a>
+  </div>
+</header>
+<div id="rundowns">
+<section class="rundown-entry" data-date="2026-04-27">
+  <div class="entry-header">
+    <span class="entry-date">📅 April 27, 2026</span>
+    <span class="entry-meta">Generated: April 27, 2026 | Pre-Market CT</span>
+  </div>
+  <div class="entry-body">
+    
+  <details open>
+    <summary>🌐 Macro Overview</summary>
+    <div class="section-content">
+      <p>US equity futures opened the week slightly lower as stalled US-Iran peace talks and renewed Strait of Hormuz tensions dampened risk appetite ahead of the most consequential earnings week of 2026. Dow futures fell ~0.2%, S&amp;P 500 and Nasdaq 100 futures each slipped ~0.2% in early trading, though markets stabilized as the session progressed with the S&amp;P 500 edging up 0.1% by midday. <em>via Yahoo Finance, BNN Bloomberg</em></p>
+<p>Context: Both the S&amp;P 500 and Nasdaq Composite closed last week at record highs. The S&amp;P 500 has gained more than 9% in April, while the Nasdaq has surged over 15% this month. The Dow is up more than 6% over the same period. <em>via Yahoo Finance</em></p>
+<p><strong>Geopolitical:</strong> The Strait of Hormuz remains a live risk. Iran reopened the strait to commercial traffic on April 17 following a ceasefire, but US-Iran peace talks have stalled again, with the US cancelling envoy trips over the weekend. Oil prices are elevated but off their crisis highs. Gold is trading near $4,719/oz in a narrow range as investors adopt a wait-and-see posture ahead of the Fed meeting. <em>via Yahoo Finance, Sharecast</em></p>
+<p><strong>Fed:</strong> The FOMC meets Tuesday–Wednesday (April 28–29). A hold at 3.50%–3.75% is near-certain — CME FedWatch shows &gt;99% probability of no change. The key watch is Powell's tone on inflation and the growth outlook, as this is his final meeting before his term ends. Futures markets are pricing a 65% chance rates stay flat through year-end. <em>via Kiplinger, Yahoo Finance</em></p>
+    </div>
+  </details>
+  <details >
+    <summary>📅 Economic Calendar</summary>
+    <div class="section-content">
+      <table>
+<thead>
+<tr>
+<th>Time (CT)</th>
+<th>Event</th>
+<th>Prior</th>
+<th>Consensus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All week</td>
+<td>FOMC Meeting (Apr 28–29)</td>
+<td>3.50–3.75%</td>
+<td>Hold expected</td>
+</tr>
+<tr>
+<td>Tue Apr 28</td>
+<td>FOMC Day 1</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Wed Apr 29</td>
+<td>FOMC Decision + Powell Press Conference</td>
+<td>—</td>
+<td>No cut</td>
+</tr>
+<tr>
+<td>Thu Apr 30</td>
+<td>GDP Q1 Advance Estimate</td>
+<td>—</td>
+<td>Watch closely</td>
+</tr>
+<tr>
+<td>Fri May 1</td>
+<td>PCE Inflation (March)</td>
+<td>—</td>
+<td>Key inflation read</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> No major US data releases today (Monday). The week's macro weight falls on Wednesday (FOMC + Mag 7 earnings) and Friday (PCE). <em>via Scotiabank Economic Calendar, FearGreedMeter</em></p>
+    </div>
+  </details>
+  <details >
+    <summary>📊 Earnings Reports</summary>
+    <div class="section-content">
+      <p><strong>This week is the busiest of earnings season.</strong> Five of the Magnificent Seven report, along with 160+ S&amp;P 500 companies. S&amp;P 500 blended Q1 earnings growth is running at 15.1% YoY, above the 13.2% estimate at quarter-end. 84% of reporters so far have beaten consensus. <em>via Forbes/FactSet</em></p>
+<p><strong>Wednesday (Apr 29) — After Close:</strong><br />
+- <strong>GOOGL</strong> (Alphabet) — Est. EPS $2.64, Est. Revenue $92.2B (+20.6% YoY). EPS est. down 6.1% YoY. Stock up 10%+ in April. <em>via Yahoo Finance/Zacks</em><br />
+- <strong>META</strong> (Meta Platforms) — Reporting Wednesday. Stock up 10%+ in April. AI monetization and ad revenue growth are the key metrics to watch.<br />
+- <strong>MSFT</strong> (Microsoft) — Reporting Wednesday. YTD laggard among Mag 7. Azure cloud growth and AI Copilot adoption are the focus. Heavy AI capex spend is a margin risk. <em>via Zacks, ainvest</em><br />
+- <strong>AMZN</strong> (Amazon) — Reporting Wednesday. AWS cloud growth and advertising revenue are the primary catalysts. <em>via Motley Fool</em></p>
+<p><strong>Thursday (Apr 30) — After Close:</strong><br />
+- <strong>AAPL</strong> (Apple) — Stock up 6%+ in April. Services revenue and iPhone demand guidance are key. <em>via CNBC</em></p>
+<p><strong>Last Week Highlights (context):</strong><br />
+- <strong>TSLA</strong> — Beat on revenue ($22.39B) and margins, but stock gave back gains after Musk outlined massive AI/robotics capex plans on the call. <em>via Advisor Perspectives</em><br />
+- <strong>INTC</strong> — Strong beat; Data Center &amp; AI segment up 22% YoY. Stock surged ~22% Friday to all-time highs. <em>via Advisor Perspectives</em><br />
+- <strong>UNH</strong> — Beat and raise on Q1; calmed fears over rising medical costs. <em>via Advisor Perspectives</em></p>
+<p><strong>Today (Monday Apr 27):</strong> No major watchlist earnings today.</p>
+    </div>
+  </details>
+  <details open>
+    <summary>🎯 Analyst Ratings</summary>
+    <div class="section-content">
+      <p><strong>Watchlist Names:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Ticker</th>
+<th>Firm</th>
+<th>Action</th>
+<th>New Rating</th>
+<th>Price Target</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AMD</strong></td>
+<td>Northland Capital</td>
+<td><span class="rating-badge rating-downgrade">Downgrade</span></td>
+<td>Market Perform (from Outperform)</td>
+<td>$260</td>
+<td>After 11 years of bullish coverage; stock down ~3.5% today. Firm says 58% monthly rally outpaced fundamentals; 2027 consensus too high; AI capex slowdown risk. Still expects AMD to beat Q1 next week. <em>via Yahoo Finance</em></td>
+</tr>
+<tr>
+<td><strong>MU</strong></td>
+<td>Melius Research</td>
+<td><span class="rating-badge rating-initiate">Initiate Buy</span></td>
+<td>Buy</td>
+<td>$700</td>
+<td>AI memory demand expected to remain elevated through end of decade; 41% upside target. Stock up ~4.8%. <em>via Motley Fool</em></td>
+</tr>
+<tr>
+<td><strong>SNDK</strong></td>
+<td>Melius Research</td>
+<td><span class="rating-badge rating-initiate">Initiate Buy</span></td>
+<td>Buy</td>
+<td>$1,350</td>
+<td>NAND pricing strength; 36% upside target. NAND ASPs projected up 70–90% sequentially in Q1 2026. Stock up ~7%. <em>via Motley Fool, Blockonomi</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Other Notable Ratings:</strong><br />
+- <strong>SNAP</strong> — Upgraded to Buy by Rothschild &amp; Co Redburn, PT $10 (from $5). First-time GAAP profitability expected this year. <em>via Yahoo Finance</em></p>
+    </div>
+  </details>
+  <details open>
+    <summary>⚡ Stocks in Play</summary>
+    <div class="section-content">
+      <div class="stocks-grid">
+        <div class="stock-card">
+          <div class="ticker">SNDK</div>
+          <div class="catalyst">Melius Research Buy initiation, $1,350 PT; NAND pricing surge 70–90% QoQ</div>
+          <div class="setup">Stock ripped from $642 on Apr 2 to $1,061 today — near-parabolic run. Up 7%+ today. Momentum name; watch for continuation or exhaustion near $1,063 resistance.</div>
+        </div>
+        <div class="stock-card">
+          <div class="ticker">MU</div>
+          <div class="catalyst">Melius Research Buy initiation, $700 PT; AI HBM demand through 2030</div>
+          <div class="setup">Up ~4.8% today. Up 550%+ over the past year. AI memory cycle thesis intact.</div>
+        </div>
+        <div class="stock-card">
+          <div class="ticker">AMD</div>
+          <div class="catalyst">Northland Capital downgrade to Market Perform, PT $260; 2027 AI capex slowdown concern</div>
+          <div class="setup">Down ~3.5% today. Stock slipped below $330 after peaking at $353. Reports earnings next week — downgrade is valuation/timing call, not fundamental. Watch for stabilization.</div>
+        </div>
+        <div class="stock-card">
+          <div class="ticker">NVDA</div>
+          <div class="catalyst">Indirect catalyst: AMD downgrade highlights NVDA's TSMC supply chain advantage and AI dominance</div>
+          <div class="setup">No direct news today, but AMD weakness may benefit NVDA sentiment. Monitor.</div>
+        </div>
+        <div class="stock-card">
+          <div class="ticker">GOOGL / META / MSFT / AMZN</div>
+          <div class="catalyst">All report Wednesday after close — the single biggest earnings event of 2026</div>
+          <div class="setup">All up 10%+ in April. Implied moves ~2.7% on average. AI capex vs. margin narrative is the key tension. Position sizing ahead of Wednesday is the trade.</div>
+        </div></div><p style="margin-top:14px;font-weight:600;color:#8b949e;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Other Movers</p><ul>
+<li><strong>QCOM</strong> (Qualcomm) — Surged 13% premarket on report that OpenAI is partnering with Qualcomm and MediaTek to develop AI-first smartphone processors. Mass production targeted for 2028. Analyst: Ming-Chi Kuo (TF International Securities). <em>via Reuters/Yahoo Finance</em> — High-momentum name today.</li>
+<li><strong>INTC</strong> (Intel) — Continued strength after Friday's 22% surge on earnings beat. Watch for follow-through or profit-taking.</li>
+</ul>
+    </div>
+  </details>
+  <details >
+    <summary>🔍 Market Themes</summary>
+    <div class="section-content">
+      <p><strong>1. Mag 7 Earnings Week — The Market's Biggest Test of 2026</strong><br />
+Five Mag 7 names report this week. The S&amp;P 500's 15.1% blended earnings growth rate is running well above expectations, but the stocks have already rallied 10–15% in April. The question is whether results justify the run-up or trigger a "sell the news" reaction. AI capex spend vs. margin discipline is the central narrative. <em>via Forbes, Zacks</em></p>
+<p><strong>2. AI Memory Cycle Remains Intact</strong><br />
+Melius Research's double Buy initiation on MU and SNDK today reinforces the thesis that HBM and NAND demand will remain elevated through the end of the decade. Memory stocks have been the market's best-performing group in 2026. <em>via CNBC</em></p>
+<p><strong>3. AI Smartphone — New Frontier Opens</strong><br />
+The QCOM/OpenAI smartphone chip story introduces a new AI hardware narrative beyond data centers. If confirmed, this could broaden the AI trade into mobile silicon. MediaTek is also a beneficiary. <em>via Reuters</em></p>
+<p><strong>4. Geopolitical Overhang — Hormuz &amp; Fed</strong><br />
+Stalled US-Iran talks are keeping oil elevated and gold in a holding pattern. The FOMC meeting (Apr 28–29) is a known event with a near-certain hold, but Powell's tone on inflation and his final press conference as Chair will be closely watched for any dovish or hawkish pivot signals. <em>via Sharecast, Kiplinger</em></p>
+<p><strong>5. Valuation Tension in Semis</strong><br />
+AMD's downgrade after a 58% monthly rally signals that the semi sector may be pricing in perfection. With AMD reporting next week, the setup is beat-and-raise but "not good enough" risk is real. NVDA's supply chain advantage over AMD is being highlighted by analysts. <em>via 247WallSt, Yahoo Finance</em></p>
+    </div>
+  </details>
+  <details >
+    <summary>📌 Secondary Names</summary>
+    <div class="section-content">
+      <ul>
+<li><strong>GLD</strong> — Gold trading near $4,719/oz, flat to slightly positive. Holding in a narrow range as investors await FOMC and geopolitical clarity. Not a momentum trade today but a key risk-off signal to monitor. <em>via Yahoo Finance</em></li>
+<li><strong>SPY</strong> — S&amp;P 500 essentially flat (+0.1%) in a holding pattern ahead of Wednesday's earnings avalanche. Breadth is narrow.</li>
+<li><strong>VIX</strong> — Watch for any spike ahead of Wednesday's Mag 7 prints. Currently subdued given the market's record-high positioning.</li>
+<li><strong>SNAP</strong> — Upgraded to Buy by Rothschild, PT $10. GAAP profitability catalyst. Small-cap social media name; lower priority but worth watching if momentum builds.</li>
+<li><strong>AAL</strong> (American Airlines) — Beat Q1 estimates (loss of $0.40 vs. $0.47 expected), revenue $13.91B vs. $13.79B est. Upgraded by analysts despite full-year loss warning. <em>via Blockonomi</em></li>
+</ul>
+    </div>
+  </details>
+  <details >
+    <summary>🗓️ Week Ahead</summary>
+    <div class="section-content">
+      <table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Key Events</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mon Apr 27</strong></td>
+<td>No major data. AMD, QCOM in play.</td>
+</tr>
+<tr>
+<td><strong>Tue Apr 28</strong></td>
+<td>FOMC Day 1. Coca-Cola (KO) earnings pre-market.</td>
+</tr>
+<tr>
+<td><strong>Wed Apr 29</strong></td>
+<td><strong>FOMC Decision + Powell Press Conference.</strong> GOOGL, META, MSFT, AMZN earnings after close. GDP Q1 Advance Estimate.</td>
+</tr>
+<tr>
+<td><strong>Thu Apr 30</strong></td>
+<td>AAPL earnings after close. PCE inflation data (March). AMD earnings (next week — confirm date).</td>
+</tr>
+<tr>
+<td><strong>Fri May 1</strong></td>
+<td>PCE / Personal Income &amp; Spending. Markets closed for some international exchanges.</td>
+</tr>
+<tr>
+<td><strong>Sat May 3</strong></td>
+<td>Berkshire Hathaway Annual Meeting ("Woodstock for Capitalists").</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Other earnings this week:</strong> Domino's Pizza (DPZ), Starbucks (SBUX), Mastercard (MA), Eli Lilly (LLY), NXP Semiconductors (NXPI). <em>via Forbes</em></p>
+    </div>
+  </details>
+  </div>
+</section>
+</div>
+<footer>
+  <p>⚠️ For market research and informational purposes only. Not financial advice.<br>
+  © 2026 Rajeev Piyare · Daily Market Rundown</p>
+</footer>
+</body>
+</html>
