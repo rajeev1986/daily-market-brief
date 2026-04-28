@@ -74,72 +74,80 @@ def search(client: OpenAI, prompt: str) -> str:
 
 
 def research(client: OpenAI, today: date) -> dict[str, str]:
-    """Run all 8 research categories. Returns dict of category → text."""
-    date_str   = today.strftime("%B %d, %Y")
-    wl         = ", ".join(WATCHLIST)
-    results    = {}
-    categories = {
-        "macro": (
-            f"Today is {date_str}. Search for today's pre-market macro conditions: "
-            "overnight futures (S&P 500, Nasdaq, Dow), global market moves (Asia, Europe), "
-            "Fed commentary, geopolitical events, currency moves (USD, JPY, EUR), oil and gold. "
-            "Sources: Reuters, Bloomberg, CNBC, MarketWatch, Yahoo Finance. "
-            "Summarize in 4-6 bullet points. Cite each source inline."
-        ),
-        "economic_calendar": (
-            f"Today is {date_str}. Search for today's U.S. economic data releases and "
-            "Fed speaker events. Include: event name, time ET, consensus estimate, prior value. "
-            "Sources: Investing.com economic calendar, ForexFactory, BLS.gov, Federal Reserve. "
-            "If no major releases today, state that clearly."
-        ),
-        "earnings": (
-            f"Today is {date_str}. Search for companies reporting earnings today "
-            f"(pre-market and after-hours) and notable results from this week. "
-            f"Watchlist tickers first: {wl}. "
-            "For each: ticker, EPS actual vs estimate, revenue actual vs estimate, stock reaction. "
-            "Sources: Earnings Whispers, Yahoo Finance, MarketWatch, CNBC. Cite sources inline."
-        ),
-        "analyst_ratings": (
-            f"Today is {date_str}. Search for today's analyst upgrades, downgrades, "
-            f"initiations, and price target changes. Watchlist first: {wl}. "
-            "For each: ticker, firm, action, new rating, price target, one-sentence thesis. "
-            "Sources: Benzinga, MarketBeat, TheStreet, Tipranks, CNBC. Cite sources inline."
-        ),
-        "stocks_in_play": (
-            f"Today is {date_str}. Search for the most active pre-market movers and "
-            "stocks with significant news catalysts today. "
-            f"Watchlist first: {wl}. "
-            "For each: ticker, % move pre-market, catalyst, one sentence on why it could move. "
-            "Sources: Benzinga, Finviz, MarketBeat, Yahoo Finance, CNBC pre-market movers. "
-            "Cite sources inline."
-        ),
-        "market_themes": (
-            f"Today is {date_str}. Search for dominant sector narratives, ETF flows, "
-            "and broader market themes driving today's action. What sectors are leading/lagging? "
-            "Sources: ETF.com, Sector SPDRs, Yahoo Finance, MarketWatch, Seeking Alpha. "
-            "Summarize 3-4 key themes. Cite sources inline."
-        ),
-        "secondary_names": (
-            f"Today is {date_str}. Search for stocks with fresh news today that are notable "
-            "but lower priority than the primary movers. "
-            f"Exclude watchlist tickers already covered: {wl}. "
-            "Include: ticker, brief catalyst, one sentence note. "
-            "Sources: Benzinga, Yahoo Finance, MarketWatch. Cite sources inline."
-        ),
-        "week_ahead": (
-            f"Today is {date_str}. Search for key events for the rest of this week and "
-            "next week: earnings (with dates), economic data releases, Fed events, "
-            "major geopolitical or policy events. "
-            "Sources: Earnings Whispers, Investing.com calendar, Federal Reserve, CNBC. "
-            "Format as a list by date. Cite sources inline."
-        ),
-    }
+    """Run research using 4 combined searches instead of 8 serial ones."""
+    date_str = today.strftime("%B %d, %Y")
+    wl       = ", ".join(WATCHLIST)
+    results  = {}
 
-    for name, prompt in categories.items():
-        log.info("Researching: %s", name)
-        text = search(client, prompt)
-        results[name] = text
-        if not text:
+    # ── Combined search 1: Macro + Economic Calendar ──────────────────
+    log.info("Researching: macro + economic_calendar")
+    text = search(client,
+        f"Today is {date_str}. Search for two things:\n"
+        "1) Pre-market macro conditions: overnight futures (S&P 500, Nasdaq, Dow), "
+        "global market moves (Asia, Europe), Fed commentary, geopolitical events, "
+        "currency moves (USD, JPY, EUR), oil and gold prices. "
+        "Sources: Reuters, Bloomberg, CNBC, MarketWatch, Yahoo Finance.\n"
+        "2) Today's U.S. economic data releases and Fed speaker events: "
+        "event name, time ET, consensus estimate, prior value. "
+        "Sources: Investing.com, ForexFactory, BLS.gov, Federal Reserve. "
+        "If no major releases today, state that clearly.\n"
+        "Summarize each part in 4-6 bullet points. Cite sources inline."
+    )
+    results["macro"] = text
+    results["economic_calendar"] = text  # same search, split by LLM at synthesis
+
+    # ── Combined search 2: Earnings + Analyst Ratings ─────────────────
+    log.info("Researching: earnings + analyst_ratings")
+    text = search(client,
+        f"Today is {date_str}. Search for two things:\n"
+        f"1) Companies reporting earnings today (pre-market and after-hours). "
+        f"Watchlist tickers first: {wl}. "
+        "For each: ticker, EPS actual vs estimate, revenue actual vs estimate, stock reaction. "
+        "Sources: Earnings Whispers, Yahoo Finance, MarketWatch, CNBC.\n"
+        f"2) Today's analyst upgrades, downgrades, initiations, and price target changes. "
+        f"Watchlist first: {wl}. "
+        "For each: ticker, firm, action, new rating, price target, one-sentence thesis. "
+        "Sources: Benzinga, MarketBeat, TheStreet, Tipranks, CNBC.\n"
+        "Cite sources inline for both."
+    )
+    results["earnings"] = text
+    results["analyst_ratings"] = text  # same search, split by LLM at synthesis
+
+    # ── Combined search 3: Stocks in Play + Market Themes ─────────────
+    log.info("Researching: stocks_in_play + market_themes")
+    text = search(client,
+        f"Today is {date_str}. Search for two things:\n"
+        f"1) Most active pre-market movers and stocks with significant news catalysts. "
+        f"Watchlist first: {wl}. "
+        "For each: ticker, % move pre-market, catalyst, one sentence on why it could move. "
+        "Sources: Benzinga, Finviz, MarketBeat, Yahoo Finance, CNBC pre-market movers.\n"
+        "2) Dominant sector narratives, ETF flows, and broader market themes driving today's action. "
+        "What sectors are leading/lagging? 3-4 key themes. "
+        "Sources: ETF.com, Sector SPDRs, Yahoo Finance, MarketWatch, Seeking Alpha.\n"
+        "Cite sources inline for both."
+    )
+    results["stocks_in_play"] = text
+    results["market_themes"] = text  # same search, split by LLM at synthesis
+
+    # ── Combined search 4: Secondary Names + Week Ahead ───────────────
+    log.info("Researching: secondary_names + week_ahead")
+    text = search(client,
+        f"Today is {date_str}. Search for two things:\n"
+        "1) Stocks with fresh news today that are notable but lower priority movers. "
+        "Include: ticker, brief catalyst, one sentence note. "
+        "Sources: Benzinga, Yahoo Finance, MarketWatch.\n"
+        "2) Key events for the rest of this week and next week: earnings (with dates), "
+        "economic data releases, Fed events, major geopolitical or policy events. "
+        "Format as a list by date. "
+        "Sources: Earnings Whispers, Investing.com calendar, Federal Reserve, CNBC.\n"
+        "Cite sources inline for both."
+    )
+    results["secondary_names"] = text
+    results["week_ahead"] = text  # same search, split by LLM at synthesis
+
+    # Log any empty results
+    for name, val in results.items():
+        if not val:
             log.warning("No data returned for: %s", name)
 
     return results
@@ -571,6 +579,18 @@ def main() -> None:
     log.info("Daily Market Rundown pipeline — %s", iso_date)
     log.info("=" * 60)
 
+    # ── Guard: skip weekends ──────────────────────────────────────────
+    if today.weekday() >= 5:  # 5=Saturday, 6=Sunday
+        log.info("Today is a weekend (%s). Skipping run.", today.strftime("%A"))
+        sys.exit(0)
+
+    # ── Guard: skip if today's rundown already exists ─────────────────
+    md_path = REPO_DIR / f"rundown_{iso_date}.md"
+    if md_path.exists():
+        log.info("Rundown for %s already exists (%s). Skipping to avoid duplicate billing.",
+                 iso_date, md_path.name)
+        sys.exit(0)
+
     client = OpenAI(api_key=api_key)
 
     # ── 1. Research ───────────────────────────────────────────────────
@@ -586,7 +606,6 @@ def main() -> None:
     markdown = generate_markdown(client, research_data, today)
 
     # ── 3. Save markdown ──────────────────────────────────────────────
-    md_path = REPO_DIR / f"rundown_{iso_date}.md"
     md_path.write_text(markdown, encoding="utf-8")
     log.info("Saved %s", md_path.name)
 
