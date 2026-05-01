@@ -631,23 +631,184 @@ def trim_entries(html: str) -> str:
     return html
 
 
+# ── Archive page shell ────────────────────────────────────────────────────────
+
+ARCHIVE_SHELL = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Rundown — {display_date}</title>
+  <style>{css}</style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="../market_rundown.html">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="24" cy="24" r="23" fill="#1e2330" stroke="#2a3044" stroke-width="1.5"/>
+        <rect x="10" y="27" width="6" height="10" rx="1" fill="#f87171"/>
+        <line x1="13" y1="24" x2="13" y2="27" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13" y1="37" x2="13" y2="40" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="21" y="18" width="6" height="13" rx="1" fill="#34d399"/>
+        <line x1="24" y1="14" x2="24" y2="18" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="31" x2="24" y2="35" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="32" y="13" width="6" height="16" rx="1" fill="#34d399"/>
+        <line x1="35" y1="9"  x2="35" y2="13" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="35" y1="29" x2="35" y2="33" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="13,32 24,23 35,18" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.8"/>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-title">Market Rundown</span>
+        <span class="logo-sub">Daily Pre-Market Brief</span>
+      </div>
+    </a>
+    <div id="last-updated">
+      <a href="index.html" style="margin-right:1rem;">📁 Archive</a>
+      <a href="../market_rundown.html">⬅ Latest</a>
+    </div>
+  </header>
+  <main>
+    <div id="rundowns">
+      {entry}
+    </div>
+    <footer>
+      <p class="footer-disclaimer">
+        <strong>⚠️ For market research and informational purposes only.</strong>
+        This briefing does not constitute financial advice, investment recommendations, or an offer to buy or sell any security.
+        All content is aggregated from publicly available sources and is provided as-is without warranty of accuracy or completeness.
+        Past market performance is not indicative of future results. Always conduct your own due diligence and consult a qualified
+        financial advisor before making any investment decisions.
+      </p>
+      <p class="footer-copy">Daily Market Rundown &nbsp;·&nbsp; Generated automatically from public sources</p>
+    </footer>
+  </main>
+</body>
+</html>"""
+
+
+# ── Archive helpers ───────────────────────────────────────────────────────────
+
+def write_archive_page(entry_html: str, iso_date: str, display_date: str) -> None:
+    """Write a standalone archive page for this day."""
+    archive_dir = os.path.join(SCRIPT_DIR, "archive")
+    os.makedirs(archive_dir, exist_ok=True)
+    page = ARCHIVE_SHELL.format(css=CSS, display_date=display_date, entry=entry_html)
+    out_path = os.path.join(archive_dir, f"{iso_date}.html")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(page)
+    print(f"✅ Wrote archive/{iso_date}.html")
+
+
+def update_archive_index(iso_date: str, display_date: str, md_text: str) -> None:
+    """Prepend a new row to archive/index.html."""
+    index_path = os.path.join(SCRIPT_DIR, "archive", "index.html")
+    if not os.path.exists(index_path):
+        print(f"⚠️  archive/index.html not found — skipping index update")
+        return
+
+    # Extract a one-line headline from the markdown
+    headline = _extract_headline(md_text)
+
+    # Parse date parts
+    from datetime import date as dt_date
+    try:
+        d = dt_date.fromisoformat(iso_date)
+        dow = d.strftime("%A")
+        month_name = d.strftime("%B")
+        year = str(d.year)
+    except Exception:
+        dow, month_name, year = "Weekday", "Month", iso_date[:4]
+
+    new_row = (
+        f'\n          <li class="entry-item">\n'
+        f'            <span class="entry-date">{iso_date}</span>\n'
+        f'            <span class="entry-dow">{dow}</span>\n'
+        f'            <a class="entry-link" href="{iso_date}.html">{headline}</a>\n'
+        f'            <span class="entry-badge">Pre-Market</span>\n'
+        f'          </li>'
+    )
+
+    content = open(index_path, "r", encoding="utf-8").read()
+
+    # Check for duplicate
+    if f'href="{iso_date}.html"' in content:
+        print(f"ℹ️  archive/index.html already has entry for {iso_date} — skipping")
+        return
+
+    # Try to insert into existing month section
+    month_re = re.compile(
+        rf'(<div class="month-label">{month_name}</div>\s*<ul class="entry-list">)',
+        re.DOTALL
+    )
+    m = month_re.search(content)
+    if m:
+        content = content[: m.end()] + new_row + content[m.end():]
+    else:
+        # Create a new month block inside the existing year group
+        year_re = re.compile(rf'(<div class="year-label">{year}</div>)', re.DOTALL)
+        ym = year_re.search(content)
+        new_month = (
+            f'\n\n      <div class="month-group">\n'
+            f'        <div class="month-label">{month_name}</div>\n'
+            f'        <ul class="entry-list">{new_row}\n\n        </ul>\n'
+            f'      </div>'
+        )
+        if ym:
+            content = content[: ym.end()] + new_month + content[ym.end():]
+        else:
+            # New year entirely — insert before END comment or closing </main>
+            new_year = (
+                f'\n    <div class="year-group">\n'
+                f'      <div class="year-label">{year}</div>'
+                f'{new_month}\n'
+                f'    </div>\n'
+            )
+            content = content.replace("  </main>", new_year + "  </main>", 1)
+
+    with open(index_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"✅ Updated archive/index.html — added {iso_date}")
+
+
+def _extract_headline(md_text: str) -> str:
+    """Pull a short headline from the markdown for the archive index."""
+    # Try to find the first meaningful bullet or sentence after ## 1.
+    for line in md_text.splitlines():
+        line = line.strip().lstrip("-*# ").strip()
+        # Skip headers, table rows, empty lines, and very short lines
+        if len(line) > 40 and not line.startswith("|") and not line.startswith("*Pre-market"):
+            # Strip markdown bold/italic and links
+            line = re.sub(r'\*\*(.+?)\*\*', r'\1', line)
+            line = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', line)
+            line = re.sub(r'\*[^*]+\*', '', line).strip()
+            if len(line) > 20:
+                return (line[:120] + "…") if len(line) > 120 else line
+    return f"Daily Market Rundown — {md_text.splitlines()[0].lstrip('# ').strip()}"
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def build_or_update(md_file: str):
     timestamp = datetime.now().strftime("%b %d, %Y · %I:%M %p CT")
+
+    # Read markdown
+    with open(md_file, "r", encoding="utf-8") as f:
+        md_text = f.read()
+
     new_entry = build_entry(md_file)
 
-    # Collect existing entries from the current dashboard (if any), excluding
-    # the one we're about to add (avoid duplicates on re-run).
-    existing_entries = ""
+    # Extract date info
     new_iso = re.search(r"(\d{4}-\d{2}-\d{2})", os.path.basename(md_file))
     new_date = new_iso.group(1) if new_iso else ""
+    title, _ = parse_rundown(md_text)
+    date_match = re.search(r"(\w+day,\s+\w+ \d+,\s+\d{4})", title)
+    display_date = date_match.group(1) if date_match else title
 
+    # ── 1. Update market_rundown.html ────────────────────────────────────────
+    existing_entries = ""
     if os.path.exists(DASHBOARD_FILE):
         with open(DASHBOARD_FILE, "r", encoding="utf-8") as f:
             old_html = f.read()
-
-        # Extract all existing <section> blocks, skip the one matching today's date
         section_pattern = re.compile(
             r'<!--\s*═+.*?ENTRY:\s*(\d{4}-\d{2}-\d{2}).*?-->.*?</section>',
             re.DOTALL
@@ -656,22 +817,20 @@ def build_or_update(md_file: str):
         for m in section_pattern.finditer(old_html):
             if m.group(1) != new_date:
                 kept.append(m.group(0))
-
-        # Enforce MAX_ENTRIES (new entry counts as 1)
         kept = kept[:MAX_ENTRIES - 1]
         existing_entries = "\n".join(kept)
 
     combined = new_entry + ("\n" + existing_entries if existing_entries else "")
-
-    html = SHELL.format(
-        css=CSS,
-        timestamp=timestamp,
-        placeholder=combined + "\n      " + PLACEHOLDER
-    )
-
+    html = SHELL.format(css=CSS, timestamp=timestamp,
+                        placeholder=combined + "\n      " + PLACEHOLDER)
     with open(DASHBOARD_FILE, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"✅ Built {DASHBOARD_FILE} — {os.path.basename(md_file)} at top")
+
+    # ── 2. Write archive/YYYY-MM-DD.html ─────────────────────────────────────
+    if new_date:
+        write_archive_page(new_entry, new_date, display_date)
+        update_archive_index(new_date, display_date, md_text)
 
 
 if __name__ == "__main__":
