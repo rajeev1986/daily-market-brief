@@ -130,6 +130,12 @@ SHELL = """<!DOCTYPE html>
       </div>
     </a>
     <div id="last-updated">{timestamp}</div>
+    <a href="archive/index.html"
+       style="font-size:0.78rem;font-family:var(--font-mono);background:var(--surface2);
+              border:1px solid var(--border);border-radius:var(--radius);padding:0.3rem 0.75rem;
+              white-space:nowrap;color:var(--accent);text-decoration:none;"
+       onmouseover="this.style.background='var(--border)'"
+       onmouseout="this.style.background='var(--surface2)'">📁 Archive</a>
   </header>
   <main>
     <div id="rundowns">
