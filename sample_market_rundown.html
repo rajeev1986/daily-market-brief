@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Market Rundown</title>
+  <style>
+    /* ── Reset & Base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0f14;
+      --surface:     #161a23;
+      --surface2:    #1e2330;
+      --border:      #2a3044;
+      --accent:      #4a9eff;
+      --accent-dim:  #1e3a5f;
+      --green:       #34d399;
+      --red:         #f87171;
+      --yellow:      #fbbf24;
+      --text:        #e2e8f0;
+      --text-muted:  #7a8499;
+      --text-dim:    #4a5568;
+      --radius:      8px;
+      --font:        'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono:   'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 0 0 4rem;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    header .brand .icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    header h1 span {
+      color: var(--accent);
+    }
+
+    #last-updated {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.3rem 0.75rem;
+      white-space: nowrap;
+    }
+
+    /* ── Page Layout ─────────────────────────────────────────────── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 0;
+    }
+
+    /* ── Empty State ─────────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--text-dim);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state h2 {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .empty-state p {
+      font-size: 0.875rem;
+    }
+
+    /* ── Rundown Card ────────────────────────────────────────────── */
+    .rundown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .rundown-card .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .rundown-card .card-date {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+    }
+
+    .rundown-card .card-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Collapsible Sections ────────────────────────────────────── */
+    details {
+      border-bottom: 1px solid var(--border);
+    }
+
+    details:last-child {
+      border-bottom: none;
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      list-style: none;
+      transition: background 0.15s;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary:hover {
+      background: var(--surface2);
+    }
+
+    summary::after {
+      content: '›';
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+
+    details[open] summary::after {
+      transform: rotate(90deg);
+    }
+
+    .section-icon {
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    .section-body {
+      padding: 1rem 1.25rem 1.25rem;
+    }
+
+    /* ── Stocks Table ────────────────────────────────────────────── */
+    .stocks-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.835rem;
+    }
+
+    .stocks-table thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stocks-table th {
+      text-align: left;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stocks-table th:not(:first-child) { text-align: right; }
+
+    .stocks-table td {
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .stocks-table tbody tr:last-child td { border-bottom: none; }
+
+    .stocks-table tbody tr:hover { background: var(--surface2); }
+
+    .stocks-table td:not(:first-child) { text-align: right; }
+
+    .ticker {
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+
+    .stock-name {
+      font-family: var(--font);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .price { color: var(--text); font-weight: 500; }
+
+    .up   { color: var(--green); }
+    .down { color: var(--red);   }
+    .flat { color: var(--text-muted); }
+
+    .pill {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .pill.up   { background: rgba(52, 211, 153, 0.12); color: var(--green); }
+    .pill.down { background: rgba(248, 113, 113, 0.12); color: var(--red);  }
+    .pill.flat { background: var(--surface2); color: var(--text-muted); }
+
+    /* ── Prose Sections ──────────────────────────────────────────── */
+    .prose {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.75;
+    }
+
+    .prose p + p { margin-top: 0.65rem; }
+
+    .prose strong { color: var(--text); font-weight: 600; }
+
+    .prose .tag {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.05rem 0.4rem;
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      margin: 0 1px;
+    }
+
+    /* ── Key Levels ──────────────────────────────────────────────── */
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .level-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.85rem;
+    }
+
+    .level-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .level-value {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .level-note {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ── Watchlist Pills ─────────────────────────────────────────── */
+    .watchlist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .watch-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .watch-item .wt { font-weight: 700; color: var(--accent); }
+    .watch-item .wp { color: var(--text-muted); }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding-top: 2.5rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      header { padding: 1rem; flex-wrap: wrap; }
+      main   { padding: 1rem 0.75rem 0; }
+      .stocks-table { font-size: 0.77rem; }
+      .stocks-table th, .stocks-table td { padding: 0.45rem 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────────────── -->
+  <header>
+    <div class="brand">
+      <span class="icon">📈</span>
+      <h1>Daily Market <span>Rundown</span></h1>
+    </div>
+    <div id="last-updated">Last updated: Apr 18, 2026 · Pre-market ET</div>
+  </header>
+
+  <!-- ── Main Content ─────────────────────────────────────────────── -->
+  <main>
+    <div id="rundowns">
+
+      <!-- ══════════════════════════════════════════════════════════════
+           ENTRY: 2026-04-18
+           ══════════════════════════════════════════════════════════════ -->
+      <section class="rundown-card" data-date="2026-04-18">
+
+        <div class="card-header">
+          <span class="card-date">Saturday, April 18, 2026</span>
+          <span class="card-badge">WEEKLY SETUP · PRE-MARKET</span>
+        </div>
+
+        <!-- ── 1. Macro Overview ───────────────────────────────────────── -->
+        <details open>
+          <summary><span class="section-icon">🌐</span> Macro Overview</summary>
+          <div class="section-body">
+            <div class="levels-grid" style="margin-bottom:1rem;">
+              <div class="level-item">
+                <div class="level-label">S&amp;P 500</div>
+                <div class="level-value up">7,126.06</div>
+                <div class="level-note up">+1.2% Fri &nbsp;·&nbsp; +4.5% Wk &nbsp;·&nbsp; ATH</div>
+              </div>
+              <div class="level-item">
+                <div class="level-label">Nasdaq</div>
+                <div class="level-value up">24,016+</div>
+                <div class="level-note up">+1.5% Fri &nbsp;·&nbsp; +6.8% Wk &nbsp;·&nbsp; 13-day streak</div>
+              </div>
+              <div class="level-item">
+                <div class="level-label">Dow</div>
+                <div class="level-value up">~40,000+</div>
+                <div class="level-note up">+1.8% Fri &nbsp;·&nbsp; +3.2% Wk</div>
+              </div>
+              <div class="level-item">
+                <div class="level-label">VIX</div>
+                <div class="level-value">17.94</div>
+                <div class="level-note">↓ from &gt;30 late-Mar · complacency watch</div>
+              </div>
+              <div class="level-item">
+                <div class="level-label">WTI Crude</div>
+                <div class="level-value down">$83.85</div>
+                <div class="level-note down">−11.4% Friday · 2nd-largest drop since conflict</div>
+              </div>
+              <div class="level-item">
+                <div class="level-label">Brent Crude</div>
+                <div class="level-value down">$90.38</div>
+                <div class="level-note down">−9.0% Friday</div>
+              </div>
+              <div class="level-item">
+                <div class="level-label">GLD Holdings</div>
+                <div class="level-value">920T</div>
+                <div class="level-note">↑ from 840T at yr-end · safe-haven inflows</div>
+              </div>
+            </div>
+            <div class="prose">
+              <p>Markets closed Friday at fresh all-time highs after Iran declared the Strait of Hormuz open to commercial shipping, tied to a fragile 10-day Israel-Lebanon ceasefire (<a href="https://www.nbcnews.com/business/markets/oil-prices-plunge-stocks-jump-hormuz-open-iran-war-rcna332321" target="_blank" rel="noopener">NBC News</a>, <a href="https://www.euronews.com/business/2026/04/17/oil-prices-drop-over-10-after-iran-declares-the-strait-of-hormuz-completely-open" target="_blank" rel="noopener">Euronews</a>). Oil's drop was the second-largest single-day move since the conflict began — easing stagflation fears that had gripped markets since late March (<a href="https://www.cnbc.com/2026/04/17/oil-prices-wti-brent-israel-lebanon-ceasefire-trump.html" target="_blank" rel="noopener">CNBC</a>).</p>
+              <p>The <strong>Nasdaq logged its 13th consecutive winning session</strong> — longest streak since 1992 — while the S&amp;P 500 completed an 11-session V-shaped recovery from its near −10% late-March drawdown, trading above 7,000 for the first time since late January (<a href="https://www.thestreet.com/latest-news/stock-market-today-apr-17-2026-updates" target="_blank" rel="noopener">TheStreet</a>, <a href="https://www.pbs.org/newshour/economy/wall-street-hits-record-as-sp-500-continues-2-week-rally-boosted-by-hopes-for-iran-wars-end" target="_blank" rel="noopener">PBS NewsHour</a>).</p>
+              <p><strong>Key risks heading into the week:</strong> The ceasefire window is only 10 days — expiring around April 26 — making it a hard deadline for geopolitical risk re-entry. VIX at 17.94 is approaching pre-conflict complacency levels. Netflix's −9–10% after-hours move on solid-but-guided-down earnings is a reminder that individual stock risk remains elevated even in a ripping tape.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- ── 2. Economic Calendar ────────────────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">📅</span> Economic Calendar — Week of Apr 20–24</summary>
+          <div class="section-body">
+
+            <!-- FOMC Blackout Banner -->
+            <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:var(--radius);padding:0.6rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;">
+              <span style="font-size:1rem;">🔇</span>
+              <span style="font-size:0.83rem;color:var(--yellow);"><strong>FOMC Blackout Period in effect</strong> &mdash; No Fed officials may speak publicly. Blackout runs from ~Sat Apr 18 through the FOMC decision on Apr 29. Only scheduled event: Warsh nomination hearing (not an active Fed official).</span>
+            </div>
+
+            <!-- ── Monday April 20 ── -->
+            <p style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;margin-top:0.2rem;">Monday, April 20</p>
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.83rem;margin-bottom:1rem;">
+              <thead><tr>
+                <th style="width:80px">Time ET</th>
+                <th style="text-align:left">Event</th>
+                <th style="text-align:left">Period</th>
+                <th style="text-align:right">Forecast</th>
+                <th style="text-align:right">Prior</th>
+                <th style="text-align:left">Priority</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td style="color:var(--text-muted)">—</td>
+                  <td style="text-align:left;color:var(--text-muted)">No scheduled data releases</td>
+                  <td style="text-align:left;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:left"><span class="pill flat">QUIET</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- ── Tuesday April 21 ── -->
+            <p style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Tuesday, April 21</p>
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.83rem;margin-bottom:0.5rem;">
+              <thead><tr>
+                <th style="width:80px">Time ET</th>
+                <th style="text-align:left">Event</th>
+                <th style="text-align:left">Period</th>
+                <th style="text-align:right">Forecast</th>
+                <th style="text-align:right">Prior</th>
+                <th style="text-align:left">Priority</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td style="color:var(--text-muted)">8:30 AM</td>
+                  <td style="text-align:left">Philadelphia Fed Non-Manufacturing Survey</td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:left"><span class="pill flat">LOW</span></td>
+                </tr>
+                <tr style="background:rgba(251,191,36,0.05);">
+                  <td style="color:var(--text-muted)">10:00 AM</td>
+                  <td style="text-align:left"><strong>Pending Home Sales MoM</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Mar</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right"><span class="up">+1.8%</span></td>
+                  <td style="text-align:left"><span class="pill flat">MEDIUM</span></td>
+                </tr>
+                <tr style="background:rgba(248,113,113,0.05);">
+                  <td style="color:var(--text-muted)">10:00 AM</td>
+                  <td style="text-align:left"><strong>🏛️ Warsh Senate Confirmation Hearing</strong> <span style="font-size:0.75rem;color:var(--accent)">(Senate Banking Committee)</span></td>
+                  <td style="text-align:left;color:var(--text-muted)">Non-data</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:left"><span class="pill down">HIGH 🔴</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size:0.79rem;color:var(--text-muted);margin-bottom:1rem;padding:0 0.1rem;">
+              Warsh nominee for Fed Chair; Tillis (R-NC) blocking final vote until Powell probe resolved; net worth $131M–$209M disclosed, with SpaceX &amp; Polymarket stakes flagged for scrutiny (<a href="https://www.cnbc.com/2026/04/13/fed-chair-nominee-kevin-warsh-senate-confirmation-hearing.html" target="_blank" rel="noopener">CNBC</a>, <a href="https://fortune.com/2026/04/15/fed-chair-nominee-kevin-warsh-net-worth-spacex-and-polymarket/" target="_blank" rel="noopener">Fortune</a>). Pending Home Sales context: existing home sales already fell −3.6% in March to 3.98M SAAR (<a href="https://www.nar.realtor/newsroom/existing-home-sales-receded-5-9-in-march" target="_blank" rel="noopener">NAR</a>).
+            </div>
+
+            <!-- ── Wednesday April 22 ── -->
+            <p style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Wednesday, April 22</p>
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.83rem;margin-bottom:0.5rem;">
+              <thead><tr>
+                <th style="width:80px">Time ET</th>
+                <th style="text-align:left">Event</th>
+                <th style="text-align:left">Period</th>
+                <th style="text-align:right">Forecast</th>
+                <th style="text-align:right">Prior</th>
+                <th style="text-align:left">Priority</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td style="color:var(--text-muted)">TBA</td>
+                  <td style="text-align:left">Richmond Fed Manufacturing Index</td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr</td>
+                  <td style="text-align:right;color:var(--text-muted)">~&minus;5</td>
+                  <td style="text-align:right"><span class="up">0</span></td>
+                  <td style="text-align:left"><span class="pill flat">LOW</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size:0.79rem;color:var(--text-muted);margin-bottom:1rem;padding:0 0.1rem;">
+              No major scheduled reports. Richmond Fed prior surged from −10 (Feb) to 0 (Mar), beating the −8 consensus — watch for continuation or reversal. Light day otherwise.
+            </div>
+
+            <!-- ── Thursday April 23 ── -->
+            <p style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Thursday, April 23</p>
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.83rem;margin-bottom:0.5rem;">
+              <thead><tr>
+                <th style="width:80px">Time ET</th>
+                <th style="text-align:left">Event</th>
+                <th style="text-align:left">Period</th>
+                <th style="text-align:right">Forecast</th>
+                <th style="text-align:right">Prior</th>
+                <th style="text-align:left">Priority</th>
+              </tr></thead>
+              <tbody>
+                <tr style="background:rgba(251,191,36,0.05);">
+                  <td style="color:var(--text-muted)">8:30 AM</td>
+                  <td style="text-align:left"><strong>Initial Jobless Claims</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Wk ending Apr 19</td>
+                  <td style="text-align:right;color:var(--text-muted)">~213K</td>
+                  <td style="text-align:right"><span class="down">219K</span></td>
+                  <td style="text-align:left"><span class="pill flat">MEDIUM</span></td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted)">8:30 AM</td>
+                  <td style="text-align:left">Continuing Claims</td>
+                  <td style="text-align:left;color:var(--text-muted)">Wk ending Apr 12</td>
+                  <td style="text-align:right;color:var(--text-muted)">~1,870K</td>
+                  <td style="text-align:right;color:var(--text-muted)">1,868K</td>
+                  <td style="text-align:left"><span class="pill flat">LOW</span></td>
+                </tr>
+                <tr style="background:rgba(251,191,36,0.05);">
+                  <td style="color:var(--text-muted)">9:45 AM</td>
+                  <td style="text-align:left"><strong>S&amp;P Global Flash US Manufacturing PMI</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr (flash)</td>
+                  <td style="text-align:right;color:var(--text-muted)">~51.0</td>
+                  <td style="text-align:right"><span class="up">52.3</span></td>
+                  <td style="text-align:left"><span class="pill flat">MEDIUM</span></td>
+                </tr>
+                <tr style="background:rgba(251,191,36,0.05);">
+                  <td style="color:var(--text-muted)">9:45 AM</td>
+                  <td style="text-align:left"><strong>S&amp;P Global Flash US Services PMI</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr (flash)</td>
+                  <td style="text-align:right;color:var(--text-muted)">~52.0</td>
+                  <td style="text-align:right;color:var(--text-muted)">54.4</td>
+                  <td style="text-align:left"><span class="pill flat">MEDIUM</span></td>
+                </tr>
+                <tr style="background:rgba(251,191,36,0.05);">
+                  <td style="color:var(--text-muted)">9:45 AM</td>
+                  <td style="text-align:left"><strong>S&amp;P Global Flash US Composite PMI</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr (flash)</td>
+                  <td style="text-align:right;color:var(--text-muted)">~51.5</td>
+                  <td style="text-align:right;color:var(--text-muted)">53.5</td>
+                  <td style="text-align:left"><span class="pill flat">MEDIUM</span></td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted)">11:30 AM</td>
+                  <td style="text-align:left">NY Fed Weekly Economic Index</td>
+                  <td style="text-align:left;color:var(--text-muted)">Wk ending Apr 19</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:left"><span class="pill flat">LOW</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size:0.79rem;color:var(--text-muted);margin-bottom:1rem;padding:0 0.1rem;">
+              Claims: prior week jumped to 219K from 203K — first real post-tariff read on labor health; market will be watching for a spike above 230K as a recession signal. Flash PMI: March final manufacturing held at 52.3 (solid expansion driven by domestic stockpiling ahead of tariffs). April flash will be the first post-ceasefire PMI read — watch Services for consumer spending durability. New Residential Sales (Mar) rescheduled to May 5 (<a href="https://www.census.gov/construction/nrs/current/index.html" target="_blank" rel="noopener">Census</a>).
+            </div>
+
+            <!-- ── Friday April 24 ── -->
+            <p style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Friday, April 24</p>
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.83rem;margin-bottom:0.5rem;">
+              <thead><tr>
+                <th style="width:80px">Time ET</th>
+                <th style="text-align:left">Event</th>
+                <th style="text-align:left">Period</th>
+                <th style="text-align:right">Forecast</th>
+                <th style="text-align:right">Prior</th>
+                <th style="text-align:left">Priority</th>
+              </tr></thead>
+              <tbody>
+                <tr style="background:rgba(248,113,113,0.05);">
+                  <td style="color:var(--text-muted)">10:00 AM</td>
+                  <td style="text-align:left"><strong>Univ. of Michigan Consumer Sentiment — Final</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr (final)</td>
+                  <td style="text-align:right;color:var(--text-muted)">~48.0</td>
+                  <td style="text-align:right"><span class="down">47.6</span> <span style="font-size:0.72rem;color:var(--text-muted)">(prelim)</span></td>
+                  <td style="text-align:left"><span class="pill down">HIGH 🔴</span></td>
+                </tr>
+                <tr style="background:rgba(248,113,113,0.05);">
+                  <td style="color:var(--text-muted)">10:00 AM</td>
+                  <td style="text-align:left"><strong>UMich 1-Year Inflation Expectations — Final</strong></td>
+                  <td style="text-align:left;color:var(--text-muted)">Apr (final)</td>
+                  <td style="text-align:right;color:var(--text-muted)">~4.8%</td>
+                  <td style="text-align:right"><span class="down">4.8%</span> <span style="font-size:0.72rem;color:var(--text-muted)">(prelim)</span></td>
+                  <td style="text-align:left"><span class="pill down">HIGH 🔴</span></td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted)">12:45 PM</td>
+                  <td style="text-align:left">NY Fed Staff Nowcast (Q1 &amp; Q2 GDP)</td>
+                  <td style="text-align:left;color:var(--text-muted)">Q1/Q2 2026</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:left"><span class="pill flat">LOW</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size:0.79rem;color:var(--text-muted);margin-bottom:1rem;padding:0 0.1rem;">
+              ⚠️ <strong>Michigan Sentiment is the week's second most important release.</strong> The preliminary April reading hit 47.6 — an all-time record low in the survey's 74-year history, well below the 53.3 March reading and the 52.0 consensus (<a href="https://www.advisorperspectives.com/dshort/updates/2026/04/10/consumer-sentiment-plunges-to-lowest-level-on-record" target="_blank" rel="noopener">Advisor Perspectives</a>, <a href="https://fortune.com/2026/04/14/michigan-consumer-sentiment-record-low-trump-economy-unfavorable-iran-war/" target="_blank" rel="noopener">Fortune</a>). Critically, 1-year inflation expectations surged from 3.8% → 4.8% — a 100 bps jump in a single month. The final reading will incorporate post-ceasefire interviews (after Apr 7), so a slight recovery from 47.6 is possible but still historically depressed. If inflation expectations hold at 4.8%, it strengthens the case for the Fed to hold rates longer.
+            </div>
+
+            <!-- ── Looking Ahead ── -->
+            <p style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem;">Looking Ahead — Week of April 27</p>
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.83rem;">
+              <thead><tr>
+                <th>Day</th>
+                <th style="text-align:left">Event</th>
+                <th style="text-align:right">Forecast</th>
+                <th style="text-align:right">Prior</th>
+                <th style="text-align:left">Why It Matters</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td style="color:var(--text-muted);white-space:nowrap">Tue 4/28</td>
+                  <td style="text-align:left">Conference Board Consumer Confidence</td>
+                  <td style="text-align:right;color:var(--text-muted)">~87.0</td>
+                  <td style="text-align:right">91.8</td>
+                  <td style="text-align:left">Cross-check vs. Michigan; present situation vs. expectations split</td>
+                </tr>
+                <tr style="background:rgba(248,113,113,0.05);">
+                  <td style="color:var(--text-muted);white-space:nowrap">Wed 4/29</td>
+                  <td style="text-align:left"><strong>Advance Durable Goods Orders (Mar)</strong></td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right">+0.9%</td>
+                  <td style="text-align:left">Business investment health; ex-defense, ex-aircraft the key core read</td>
+                </tr>
+                <tr style="background:rgba(248,113,113,0.05);">
+                  <td style="color:var(--text-muted);white-space:nowrap">Wed 4/29</td>
+                  <td style="text-align:left"><strong>🏛️ FOMC Rate Decision — 2:00 PM ET</strong></td>
+                  <td style="text-align:right;color:var(--text-muted)">Hold</td>
+                  <td style="text-align:right;color:var(--text-muted)">4.25–4.50%</td>
+                  <td style="text-align:left">Press conference 2:30 PM; Warsh testimony this week may signal future direction</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted);white-space:nowrap">Thu 4/30</td>
+                  <td style="text-align:left">Q1 GDP — Advance Estimate</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right">+2.4%</td>
+                  <td style="text-align:left">First look at Q1 growth; front-loading effects may distort</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted);white-space:nowrap">Thu 4/30</td>
+                  <td style="text-align:left">Employment Cost Index (Q1)</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right">+1.0%</td>
+                  <td style="text-align:left">Key Fed inflation input; wage pressure watch</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted);white-space:nowrap">May 5</td>
+                  <td style="text-align:left">New Residential Sales — Mar (rescheduled)</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:right;color:var(--text-muted)">—</td>
+                  <td style="text-align:left">Was originally Apr 23; rescheduled per Census Bureau (<a href="https://www.census.gov/construction/nrs/current/index.html" target="_blank" rel="noopener">Census</a>)</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </details>
+
+        <!-- ── 3. Earnings Reports ─────────────────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">📣</span> Earnings Reports</summary>
+          <div class="section-body">
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;">Already Reported</p>
+
+            <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.1rem;">
+              <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.45rem;flex-wrap:wrap;">
+                <span class="ticker">NFLX</span>
+                <span class="stock-name">Netflix &mdash; reported Thu 4/17 after close</span>
+                <span class="pill down" style="margin-left:auto;">−9–10% AH &nbsp;⚠ Watchlist</span>
+              </div>
+              <div class="prose">
+                <p>Revenue beat at $12.25B (+16% YoY vs. $12.18B est.); net income $5.28B (+83% YoY), boosted by a $2.8B Paramount Skydance termination payment. Q2 revenue guidance of +13% disappointed, and co-founder Reed Hastings announced his board exit for June — driving the after-hours selloff (<a href="https://www.bloomberg.com/news/articles/2026-04-16/netflix-revenue-beats-estimates-as-hastings-steps-down" target="_blank" rel="noopener">Bloomberg</a>, <a href="https://deadline.com/2026/04/netflix-q1-2026-earnings-wall-street-1236863099/" target="_blank" rel="noopener">Deadline</a>). Fundamentals are intact; the market sold governance risk and soft forward guidance. <strong>Watch Monday open</strong> — high-volume two-sided event expected.</p>
+              </div>
+            </div>
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;">Reporting This Week &mdash; Watchlist Names</p>
+            <table class="stocks-table" style="margin-bottom:1.1rem;">
+              <thead>
+                <tr>
+                  <th>Ticker</th>
+                  <th style="text-align:left">Date / Time</th>
+                  <th style="text-align:left">EPS Est.</th>
+                  <th style="text-align:left">Rev Est.</th>
+                  <th style="text-align:left">Key Focus</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker">UNH</span></td>
+                  <td style="text-align:left">Tue 4/21 &mdash; Pre-mkt</td>
+                  <td style="text-align:left">$6.76</td>
+                  <td style="text-align:left">~$109.8B</td>
+                  <td style="text-align:left">Medicare Advantage tailwinds; FY guide $17.75+ EPS</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">TSLA</span></td>
+                  <td style="text-align:left">Wed 4/22 &mdash; AH</td>
+                  <td style="text-align:left">$0.36–$0.38</td>
+                  <td style="text-align:left">~$22.3B</td>
+                  <td style="text-align:left">Cybercab rollout, FSD approvals, margin trajectory</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">LRCX</span></td>
+                  <td style="text-align:left">Wed 4/22 &mdash; AH</td>
+                  <td style="text-align:left">Beat expected</td>
+                  <td style="text-align:left">~$5.7B (guide)</td>
+                  <td style="text-align:left">AI equipment demand; 41.7× fwd P/E — print must be clean</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.45rem;">Other Majors This Week</p>
+            <div class="prose">
+              <p><strong>93 S&amp;P 500 companies report</strong> (7 Dow components). Financials dominate — BAC, C, GS, JPM, MS, WFC, and Travelers all reporting. Q1 earnings season is tracking ahead of consensus on both beat rate and magnitude (<a href="https://insight.factset.com/sp-500-earnings-season-update-april-17-2026" target="_blank" rel="noopener">FactSet</a>). Financials results will set the tone for XLF and sector rotation early in the week.</p>
+            </div>
+          </div>
+        </details>
+
+        <!-- ── 4. Analyst Ratings ──────────────────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">🏷️</span> Analyst Ratings</summary>
+          <div class="section-body">
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;">Watchlist Names</p>
+            <table class="stocks-table" style="margin-bottom:1.1rem;">
+              <thead>
+                <tr>
+                  <th>Ticker</th>
+                  <th style="text-align:left">Firm</th>
+                  <th style="text-align:left">Action</th>
+                  <th style="text-align:left">New Rating</th>
+                  <th style="text-align:left">Setup Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker">TSLA</span></td>
+                  <td style="text-align:left">UBS</td>
+                  <td style="text-align:left"><span class="pill up">UPGRADE</span></td>
+                  <td style="text-align:left">Neutral <span style="color:var(--text-muted);font-size:0.78rem">(from Sell)</span></td>
+                  <td style="text-align:left">Stock reclaimed $400; reduces short conviction ahead of Wed earnings</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">UNH</span></td>
+                  <td style="text-align:left">BofA</td>
+                  <td style="text-align:left"><span class="pill up">PT RAISE</span></td>
+                  <td style="text-align:left">Neutral <span style="color:var(--text-muted);font-size:0.78rem">(maintained)</span></td>
+                  <td style="text-align:left">Medicare Advantage rate hike improves near-term revenue visibility</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">LRCX</span></td>
+                  <td style="text-align:left">Zacks</td>
+                  <td style="text-align:left"><span class="pill up">STRONG BUY</span></td>
+                  <td style="text-align:left">Rank #1</td>
+                  <td style="text-align:left">Reports Wed; AI equipment cycle intact; elevated 41.7× P/E needs clean beat</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">CRDO</span></td>
+                  <td style="text-align:left">Jefferies</td>
+                  <td style="text-align:left"><span class="pill up">INITIATE</span></td>
+                  <td style="text-align:left">Buy</td>
+                  <td style="text-align:left">"Significant disconnect" between price and intrinsic value; 15% surge already occurred</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;">Other Notable</p>
+            <table class="stocks-table">
+              <thead>
+                <tr>
+                  <th>Ticker</th>
+                  <th style="text-align:left">Firm</th>
+                  <th style="text-align:left">Action</th>
+                  <th style="text-align:left">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker">LMND</span></td>
+                  <td style="text-align:left">Morgan Stanley</td>
+                  <td style="text-align:left"><span class="pill up">UPGRADE</span></td>
+                  <td style="text-align:left">Tesla data partnership cited as structural competitive advantage</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">ALGN</span></td>
+                  <td style="text-align:left">Barclays</td>
+                  <td style="text-align:left"><span class="pill up">UPGRADE</span></td>
+                  <td style="text-align:left">Price decline improved risk/reward profile</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">DOV</span></td>
+                  <td style="text-align:left">Wells Fargo</td>
+                  <td style="text-align:left"><span class="pill up">UPGRADE</span></td>
+                  <td style="text-align:left">Short-cycle industrial recovery expected to drive outperformance</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">DKNG</span></td>
+                  <td style="text-align:left">Argus</td>
+                  <td style="text-align:left"><span class="pill down">DOWNGRADE</span></td>
+                  <td style="text-align:left">Elevated customer acquisition costs, rising state taxes, rising competition</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">LLY</span></td>
+                  <td style="text-align:left">HSBC</td>
+                  <td style="text-align:left"><span class="pill down">DOWNGRADE</span></td>
+                  <td style="text-align:left">Obesity drug price reductions expected in 2026 create near-term growth headwind</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </details>
+
+        <!-- ── 5. Stocks in Play ───────────────────────────────────────── -->
+        <details open>
+          <summary><span class="section-icon">🎯</span> Stocks in Play</summary>
+          <div class="section-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:0.75rem;">
+
+              <!-- NFLX -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">NFLX</span>
+                  <span class="pill down">−9–10% AH</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Post-earnings gap &nbsp;·&nbsp; Two-sided</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Revenue and net income beat, but soft Q2 guidance and Hastings board exit drove a large after-hours gap; Monday open is likely high-volume with sellers facing off against dip buyers attracted to solid underlying fundamentals.</p>
+              </div>
+
+              <!-- UNH -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">UNH</span>
+                  <span class="pill flat">REPORTS TUE</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Pre-earnings setup</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Medicare Advantage rate tailwind already sparked an ~8% rally; BofA raised its price target; any Monday positioning is pre-earnings accumulation with gap risk either way on Tuesday's print (<a href="https://www.businesswire.com/news/home/20260317052912/en/UnitedHealth-Group-Announces-Earnings-Release-Date" target="_blank" rel="noopener">BusinessWire</a>).</p>
+              </div>
+
+              <!-- TSLA -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">TSLA</span>
+                  <span class="pill up">+15% Wk</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Pre-earnings momentum &nbsp;·&nbsp; Reports Wed AH</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Back above $400 after UBS upgraded from Sell to Neutral; FSD approved in the Netherlands; Cybercab expanding to 7+ cities — $400 is the critical support level to defend into Wednesday's print (<a href="https://www.fxleaders.com/news/2026/04/17/tsla-stock-soars-back-above-400-pre-earnings-as-analysts-reassess-tesla-outlook/" target="_blank" rel="noopener">FX Leaders</a>).</p>
+              </div>
+
+              <!-- NVDA -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">NVDA</span>
+                  <span class="pill up">+9% Wk</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">$200 breakout watch</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Trading near $199 after ASML and TSMC confirmed AI capex is accelerating; analysts see ~39% upside from current levels — the $200 psychological level is the key breakout trigger or rejection point at Monday's open (<a href="https://247wallst.com/investing/2026/04/16/asml-and-tsmc-just-told-the-market-ai-spending-isnt-slowing-down/" target="_blank" rel="noopener">24/7 Wall St.</a>).</p>
+              </div>
+
+              <!-- HOOD -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">HOOD</span>
+                  <span class="pill up">~$90.78 close</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Structural catalyst &nbsp;·&nbsp; SEC rule change</p>
+                <p style="font-size:0.83rem;line-height:1.6;">SEC formally removed the $25K Pattern Day Trader minimum — a direct structural tailwind for Robinhood's retail customer base; watch for Monday follow-through from Friday's +4.5% recovery off intraday lows.</p>
+              </div>
+
+              <!-- CRDO -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">CRDO</span>
+                  <span class="pill up">+15% Apr 14</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Post-surge: continuation or consolidation?</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Jefferies Buy initiation + $750M DustPhotonics acquisition drove a 15% surge; silicon photonics deal expected to expand gross margins 300–500 bps; ~70% AEC market share makes the valuation case compelling per Jefferies (<a href="https://markets.financialcontent.com/stocks/article/marketminute-2026-4-14-credo-technology-group-surges-15-as-analysts-flag-significant-disconnect-in-ai-connectivity-valuation" target="_blank" rel="noopener">FinancialContent</a>).</p>
+              </div>
+
+              <!-- AMD -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">AMD</span>
+                  <span class="pill up">+11% Wk</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">AI momentum continuation</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Up 11% on the week riding the same AI capex tailwind as NVDA but with less valuation pressure; moves in sympathy with NVDA and confirmed hyperscaler infrastructure spend — continuation trade if NVDA breaks $200.</p>
+              </div>
+
+              <!-- PLTR -->
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:var(--radius);padding:0.85rem 1rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;flex-wrap:wrap;">
+                  <span class="ticker">PLTR</span>
+                  <span class="pill flat">$143–$148</span>
+                  <span style="font-size:0.68rem;color:var(--accent);margin-left:auto;font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.35rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Defense AI &nbsp;·&nbsp; Volatile range &nbsp;·&nbsp; Reports May 4</p>
+                <p style="font-size:0.83rem;line-height:1.6;">Maven Smart System is now a Pentagon program of record, elevating the defense AI narrative; Michael Burry's valuation warning and Anthropic competition concerns are the active counterarguments keeping a ceiling on the stock near-term.</p>
+              </div>
+
+            </div>
+          </div>
+        </details>
+
+        <!-- ── 6. Market Themes ────────────────────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">🧭</span> Market Themes</summary>
+          <div class="section-body prose">
+            <p><strong>AI Infrastructure Spend — Confirmed Intact.</strong> ASML raised its 2026 forecast and TSMC reported capacity constraints in AI chips, collectively validating that hyperscaler capex is accelerating, not cooling. Broadcom secured a multi-year custom AI chip deal with Meta on April 14 (<a href="https://247wallst.com/investing/2026/04/16/asml-and-tsmc-just-told-the-market-ai-spending-isnt-slowing-down/" target="_blank" rel="noopener">24/7 Wall St.</a>, <a href="https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/04/51877863/taiwan-semiconductor-dominates-ai-supply-chain-even-shortages-may-not-slow-it" target="_blank" rel="noopener">Benzinga</a>). This is the dominant sector-level narrative driving semis, networking, storage, and optical infrastructure.</p>
+            <p><strong>Geopolitical De-escalation Trade.</strong> The Hormuz reopening triggered a sharp rotation out of energy and commodity-linked stocks and back into growth and tech. The 10-day ceasefire window gives this trade an expiration date — watch the April 26 window for geopolitical risk re-entry (<a href="https://www.axios.com/2026/04/17/hormuz-iran-oil-prices" target="_blank" rel="noopener">Axios</a>).</p>
+            <p><strong>Earnings Season Broadening.</strong> Q1 beat rates are running above recent averages with magnitude also above consensus. With 93 S&amp;P 500 names reporting — dominated by Financials — the market starts pricing sector rotation on results, not just macro sentiment (<a href="https://insight.factset.com/sp-500-earnings-season-update-april-17-2026" target="_blank" rel="noopener">FactSet</a>).</p>
+            <p><strong>Fed Independence Risk.</strong> The Warsh hearing introduces macro uncertainty that had been absent. Tillis blocking confirmation creates a live scenario where Powell exits May 15 with no confirmed successor — a bond and dollar market event that could interrupt the equity rally if it gets messy (<a href="https://www.cnbc.com/2026/04/13/fed-chair-nominee-kevin-warsh-senate-confirmation-hearing.html" target="_blank" rel="noopener">CNBC</a>).</p>
+            <p><strong>Storage Supercycle.</strong> WDC, STX, and SNDK all report sold-out capacity through 2026 and into 2028 for enterprise HDDs and NAND. This is a multi-quarter structural story with WDC reporting April 30 as the next data point (<a href="https://www.financialcontent.com/article/marketminute-2026-3-18-the-storage-supercycle-western-digital-and-seagate-surge-as-microns-blowout-earnings-redefine-the-ai-landscape" target="_blank" rel="noopener">FinancialContent</a>).</p>
+            <p><strong>Streaming / Consumer Tech Check.</strong> Netflix's −9–10% after-hours drop on solid fundamentals but soft guidance and a governance shock creates uncertainty across the streaming space. Watch for sympathy pressure on names like ROKU and DIS streaming expectations Monday. The key conflicting signal: NFLX revenue and earnings were strong — the market sold guidance and leadership, not the underlying business.</p>
+            <p><strong>Sector Rotation in Flux.</strong> Growth stocks recaptured leadership following the ceasefire catalyst, reversing the defensive/value rotation that dominated early April. Crypto ETFs saw their first monthly net inflow of 2026 in March ($1.32B into Bitcoin ETFs), ending a brutal four-month outflow streak — a signal that risk appetite is broadening beyond equities. Growth ETFs (iShares S&amp;P 500 Growth) surged post-ceasefire; the rotation back into large-cap tech is now the dominant flow.</p>
+          </div>
+        </details>
+
+        <!-- ── Key Risks & Conflicting Signals ──────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">⚠️</span> Key Risks &amp; Conflicting Signals</summary>
+          <div class="section-body">
+            <table class="stocks-table" style="font-family:var(--font);font-size:0.845rem;">
+              <thead>
+                <tr>
+                  <th style="text-align:left">Risk</th>
+                  <th style="text-align:left">Signal / Trigger</th>
+                  <th style="text-align:left">Implication</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align:left"><strong>Iran ceasefire collapses</strong></td>
+                  <td style="text-align:left">Hormuz closure resumes after Apr 26 window</td>
+                  <td style="text-align:left;color:var(--red)">Oil spike → VIX spike → growth selloff; reverses entire past week's energy-driven de-escalation trade</td>
+                </tr>
+                <tr>
+                  <td style="text-align:left"><strong>Warsh hearing drama</strong></td>
+                  <td style="text-align:left">Tillis blocks vote; Fed independence concerns raised</td>
+                  <td style="text-align:left;color:var(--red)">10-year yield spike; DXY move; rate-sensitive names (utilities, REITs, growth) sell off Tuesday</td>
+                </tr>
+                <tr>
+                  <td style="text-align:left"><strong>NFLX gap creates contagion</strong></td>
+                  <td style="text-align:left">−9–10% AH on guidance + Hastings exit</td>
+                  <td style="text-align:left;color:var(--yellow)">Streaming uncertainty bleeds into ROKU, DIS expectations; <em>conflicting signal</em> — NFLX fundamentals were strong, the market sold governance/guidance, not the business</td>
+                </tr>
+                <tr>
+                  <td style="text-align:left"><strong>VIX at 17.94 — complacency risk</strong></td>
+                  <td style="text-align:left">Crowded long positioning after 13-day Nasdaq streak</td>
+                  <td style="text-align:left;color:var(--yellow)">Any negative catalyst amplifies quickly; mean-reversion risk elevated when positioning is this extended</td>
+                </tr>
+                <tr>
+                  <td style="text-align:left"><strong>TSLA earnings disappoint</strong></td>
+                  <td style="text-align:left">Margin compression confirmed; delivery miss</td>
+                  <td style="text-align:left;color:var(--red)">EV sector and high-multiple Cathie Wood-type names under pressure; $400 support level breaks</td>
+                </tr>
+                <tr>
+                  <td style="text-align:left"><strong>PLTR valuation debate</strong></td>
+                  <td style="text-align:left">Burry warning + Anthropic Managed Agents competition</td>
+                  <td style="text-align:left;color:var(--yellow)">Could cap upside even on positive defense news; long vs. short-side debate is active ahead of May 4 earnings</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <!-- ── 7. Secondary Names ──────────────────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">📋</span> Secondary Names</summary>
+          <div class="section-body">
+            <table class="stocks-table">
+              <thead>
+                <tr>
+                  <th>Ticker</th>
+                  <th style="text-align:left">Catalyst</th>
+                  <th style="text-align:left">Brief</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="ticker">TSM</span></td>
+                  <td style="text-align:left">Q1 beat + raised 2026 guide</td>
+                  <td style="text-align:left">Confirmed AI capacity constraints; aggressively expanding capex into shortage (<a href="https://finance.yahoo.com/sectors/technology/articles/strong-asml-tsmc-forecasts-signal-104833111.html" target="_blank" rel="noopener">Yahoo Finance</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">AVGO</span></td>
+                  <td style="text-align:left">Multi-year Meta AI chip deal (Apr 14)</td>
+                  <td style="text-align:left">Long-duration revenue catalyst; CRDO presenting competition in 1.6T space (<a href="https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/04/51877863/taiwan-semiconductor-dominates-ai-supply-chain-even-shortages-may-not-slow-it" target="_blank" rel="noopener">Benzinga</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">CIEN</span></td>
+                  <td style="text-align:left">+2pts optical market share YTD</td>
+                  <td style="text-align:left">Expected +27% rev, &gt;100% EPS growth FY26; AI cloud demand primary driver (<a href="https://finance.yahoo.com/markets/stocks/articles/zacks-analyst-blog-highlights-ciena-072500355.html" target="_blank" rel="noopener">Zacks via Yahoo Finance</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">GLW</span></td>
+                  <td style="text-align:left">AI optical connectivity adoption</td>
+                  <td style="text-align:left">Expected +10% rev, +23% EPS CY26; steadier compounder vs. high-beta semis names</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">MU</span></td>
+                  <td style="text-align:left">Mar 18 blowout: $12.20 EPS vs. $9.19 est.</td>
+                  <td style="text-align:left">HBM4 and DDR5 demand explosive; entire 2026 HBM capacity sold out; AI data centers ~70% of high-end DRAM (<a href="https://www.financialcontent.com/article/marketminute-2026-3-18-the-storage-supercycle-western-digital-and-seagate-surge-as-microns-blowout-earnings-redefine-the-ai-landscape" target="_blank" rel="noopener">FinancialContent</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">SNDK</span></td>
+                  <td style="text-align:left">Q2 FY26: +61% rev growth, $3.03B</td>
+                  <td style="text-align:left">Storage supercycle beneficiary; WDC (parent co.) reports Apr 30 — watch for read-through</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">NLY</span></td>
+                  <td style="text-align:left">Unusual calls: 28,958 contracts (21× avg)</td>
+                  <td style="text-align:left">Bullish Apr 24 $23.50 strike flow; stock +10% in 2 weeks, broke 50-day SMA (<a href="https://www.barchart.com/options/unusual-activity" target="_blank" rel="noopener">Barchart</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">NTR</span></td>
+                  <td style="text-align:left">Unusual puts: 14,154 contracts (67× avg)</td>
+                  <td style="text-align:left">Stock −18% past month; put flow signals continued institutional caution (<a href="https://www.barchart.com/options/unusual-activity" target="_blank" rel="noopener">Barchart</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">HUN</span></td>
+                  <td style="text-align:left">Unusual puts: 43,311 contracts (660× avg)</td>
+                  <td style="text-align:left">Single-block May 15 $8 put sale; scale suggests institutional hedging or income play on depressed name (<a href="https://www.barchart.com/options/unusual-activity" target="_blank" rel="noopener">Barchart</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">STX</span></td>
+                  <td style="text-align:left">Storage supercycle; "beat and raise" expected</td>
+                  <td style="text-align:left">Enterprise HDD contracts extending to 2028; sold-out capacity alongside WDC; reports in early May — WDC Apr 30 is the read-through event (<a href="https://www.financialcontent.com/article/marketminute-2026-3-18-the-storage-supercycle-western-digital-and-seagate-surge-as-microns-blowout-earnings-redefine-the-ai-landscape" target="_blank" rel="noopener">FinancialContent</a>)</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">GOOGL</span></td>
+                  <td style="text-align:left">Watchlist; strong structure; risk-on momentum</td>
+                  <td style="text-align:left">Trading ~$336.25 with upside target toward $341.25 if buyers defend the pivot; AI narrative intact; no single-name earnings catalyst this week but benefits from broad tech bid</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">VRT</span></td>
+                  <td style="text-align:left">AI data center infrastructure theme</td>
+                  <td style="text-align:left">No new catalyst this week but remains a core AI infrastructure beneficiary; monitor for analyst updates or hyperscaler capex commentary spillover</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">MSFT</span></td>
+                  <td style="text-align:left">+1%+ Friday on risk-on; AI cloud spend</td>
+                  <td style="text-align:left">Gained alongside NVDA, AMZN, TSLA on Friday's risk-on tape; AI cloud narrative intact; no earnings catalyst this week</td>
+                </tr>
+                <tr>
+                  <td><span class="ticker">AMZN</span></td>
+                  <td style="text-align:left">+1%+ Friday on risk-on; AWS + AI tailwind</td>
+                  <td style="text-align:left">Part of the broad large-cap AI bid on Friday; AWS hyperscaler spend confirmed by TSMC/ASML read-through; no earnings catalyst this week</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <!-- ── 8. Week Ahead ───────────────────────────────────────────── -->
+        <details>
+          <summary><span class="section-icon">🗓️</span> Week Ahead</summary>
+          <div class="section-body">
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;">Key Earnings</p>
+            <table class="stocks-table" style="margin-bottom:1.1rem;">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th style="text-align:left">Ticker(s)</th>
+                  <th style="text-align:left">Time</th>
+                  <th style="text-align:left">Why It Matters</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Tue 4/21</td>
+                  <td style="text-align:left"><span class="ticker">UNH</span></td>
+                  <td style="text-align:left">Pre-mkt</td>
+                  <td style="text-align:left">⚠ Watchlist &nbsp;·&nbsp; $109.8B rev est.; Medicare Advantage read-through for managed care sector</td>
+                </tr>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Tue 4/21</td>
+                  <td style="text-align:left"><span class="ticker" style="font-size:0.77rem">BAC · C · GS · JPM · MS · WFC</span></td>
+                  <td style="text-align:left">Mixed</td>
+                  <td style="text-align:left">Financials tone-setter for Q1; drives XLF and sector rotation direction</td>
+                </tr>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Wed 4/22</td>
+                  <td style="text-align:left"><span class="ticker">TSLA</span></td>
+                  <td style="text-align:left">AH</td>
+                  <td style="text-align:left">⚠ Watchlist &nbsp;·&nbsp; Cybercab ramp, margin trajectory, FSD progress</td>
+                </tr>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Wed 4/22</td>
+                  <td style="text-align:left"><span class="ticker">LRCX</span></td>
+                  <td style="text-align:left">AH</td>
+                  <td style="text-align:left">⚠ Watchlist &nbsp;·&nbsp; $5.7B rev guide; AI equipment demand; 41.7× fwd P/E must justify itself</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;">Key Macro Events</p>
+            <table class="stocks-table" style="margin-bottom:1.1rem;">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th style="text-align:left">Event</th>
+                  <th style="text-align:left">Watch For</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Tue 4/21</td>
+                  <td style="text-align:left"><strong>Warsh Confirmation Hearing</strong> &nbsp;10am ET</td>
+                  <td style="text-align:left">Fed independence signals; Tillis blocking vote; 10-yr yield + DXY reaction (<a href="https://www.cnbc.com/2026/04/13/fed-chair-nominee-kevin-warsh-senate-confirmation-hearing.html" target="_blank" rel="noopener">CNBC</a>)</td>
+                </tr>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Tue 4/21</td>
+                  <td style="text-align:left">Consumer Sentiment</td>
+                  <td style="text-align:left">Any cracks in household confidence</td>
+                </tr>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">~Sat 4/26</td>
+                  <td style="text-align:left"><strong>10-day ceasefire window closes</strong></td>
+                  <td style="text-align:left">Oil + VIX spike risk if talks break down; primary tail risk for the week (<a href="https://www.axios.com/2026/04/17/hormuz-iran-oil-prices" target="_blank" rel="noopener">Axios</a>)</td>
+                </tr>
+                <tr>
+                  <td style="white-space:nowrap;color:var(--text-muted)">Apr 28–29</td>
+                  <td style="text-align:left">FOMC Meeting</td>
+                  <td style="text-align:left">Next major rate catalyst; Warsh hearing this week may preview future policy posture</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.55rem;">Further Out</p>
+            <div class="watchlist">
+              <div class="watch-item"><span class="wt">WDC</span><span class="wp">Reports Apr 30 — storage supercycle confirmation</span></div>
+              <div class="watch-item"><span class="wt">PLTR</span><span class="wp">Reports May 4 — AI defense narrative vs. valuation debate</span></div>
+              <div class="watch-item"><span class="wt">XLE</span><span class="wp">Watch Mon open — oil &minus;11% Fri; energy rotation pressure</span></div>
+              <div class="watch-item"><span class="wt">VIX</span><span class="wp">17.94 — complacency watch into ceasefire expiry</span></div>
+            </div>
+
+          </div>
+        </details>
+
+      </section>
+      <!-- ── end entry 2026-04-18 ──────────────────────────────────────── -->
+
+    </div>
+
+    <footer>
+      Generated by Daily Market Rundown &nbsp;·&nbsp; For informational purposes only, not financial advice.
+    </footer>
+  </main>
+
+</body>
+</html>
