@@ -1,13 +1,21 @@
 name: Daily Market Rundown
 
 # ── Schedule ──────────────────────────────────────────────────────────────
-# Runs Mon–Fri at 13:00 UTC = 8:00 AM CT (CDT, UTC-5) / 7:00 AM CST (UTC-6)
-# GitHub Actions uses UTC. CDT is UTC-5 (Mar–Nov), CST is UTC-6 (Nov–Mar).
-# 13:00 UTC covers both: 8 AM CDT in summer, 7 AM CST in winter.
-# Adjust to "0 14 * * 1-5" for strict 8 AM CST in winter if preferred.
+# GitHub Actions only supports UTC. Central Time observes two offsets:
+#   CDT (UTC-5): second Sunday of March → first Sunday of November
+#   CST (UTC-6): first Sunday of November → second Sunday of March
+#
+# To hit exactly 8:00 AM CT year-round, we run TWO cron entries:
+#   0 13 * * 1-5  →  8:00 AM CDT (summer, UTC-5)  ← active Mar–Nov
+#   0 14 * * 1-5  →  8:00 AM CST (winter, UTC-6)  ← active Nov–Mar
+#
+# On days where both could fire (DST transition days), the duplicate-run
+# guard in run_pipeline.py detects the existing rundown_YYYY-MM-DD.md
+# and exits cleanly on the second trigger — no double billing.
 on:
   schedule:
-    - cron: "0 13 * * 1-5"
+    - cron: "0 13 * * 1-5"   # 8:00 AM CDT (UTC-5, summer)
+    - cron: "0 14 * * 1-5"   # 8:00 AM CST (UTC-6, winter)
 
   # Allow manual trigger from the GitHub Actions UI
   workflow_dispatch:
