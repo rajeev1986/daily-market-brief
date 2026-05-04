@@ -44,8 +44,8 @@ MAX_ENTRIES = 7
 CT          = ZoneInfo("America/Chicago")
 
 # Models
-SEARCH_MODEL   = "gpt-4o"          # web_search_preview tool
-SYNTHESIS_MODEL = "gpt-4o"         # markdown generation
+SEARCH_MODEL    = "gpt-4o-mini"    # web_search_preview tool
+SYNTHESIS_MODEL = "gpt-4o-mini"    # markdown generation
 
 WATCHLIST = [
     "WDC", "MU", "LITE", "CIEN", "TSLA", "COHR", "CRDO", "PLTR", "TER",
