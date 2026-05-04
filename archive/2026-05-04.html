@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Rundown — Monday, May 04, 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #161a23; --surface2: #1e2330; --border: #2a3044;
+      --accent: #4a9eff; --accent-dim: #1e3a5f; --green: #34d399; --red: #f87171;
+      --yellow: #fbbf24; --text: #e2e8f0; --text-muted: #7a8499; --text-dim: #4a5568;
+      --radius: 8px; --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    }
+    html { font-size: 15px; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; min-height: 100vh; padding: 0 0 4rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+    header .brand { display: flex; align-items: center; gap: 1rem; text-decoration: none; }
+    header .brand .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    header .brand .logo-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    header .brand .logo-sub { font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.1rem; }
+    #last-updated { font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.3rem 0.75rem; white-space: nowrap; }
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 0; }
+    .rundown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1.5rem; overflow: hidden; }
+    .rundown-card .card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .rundown-card .card-date { font-size: 0.95rem; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; }
+    .rundown-card .card-badge { font-size: 0.72rem; font-family: var(--font-mono); background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 0.15rem 0.5rem; font-weight: 600; letter-spacing: 0.04em; }
+    details { border-bottom: 1px solid var(--border); }
+    details:last-child { border-bottom: none; }
+    summary { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.25rem; cursor: pointer; user-select: none; font-weight: 600; font-size: 0.875rem; color: var(--text); letter-spacing: 0.02em; text-transform: uppercase; list-style: none; transition: background 0.15s; }
+    summary::-webkit-details-marker { display: none; }
+    summary:hover { background: var(--surface2); }
+    summary::after { content: '›'; margin-left: auto; font-size: 1.1rem; color: var(--text-dim); transition: transform 0.2s; display: inline-block; }
+    details[open] summary::after { transform: rotate(90deg); }
+    .section-icon { font-size: 1rem; opacity: 0.85; }
+    .section-body { padding: 1rem 1.25rem 1.25rem; }
+    .stocks-table { width: 100%; border-collapse: collapse; font-size: 0.835rem; }
+    .stocks-table thead tr { border-bottom: 1px solid var(--border); }
+    .stocks-table th { text-align: left; padding: 0.4rem 0.75rem; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+    .stocks-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .stocks-table tbody tr:last-child td { border-bottom: none; }
+    .stocks-table tbody tr:hover { background: var(--surface2); }
+    .ticker { font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+    .up { color: var(--green); } .down { color: var(--red); } .flat { color: var(--text-muted); }
+    .pill { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+    .pill.up { background: rgba(52,211,153,0.12); color: var(--green); }
+    .pill.down { background: rgba(248,113,113,0.12); color: var(--red); }
+    .pill.flat { background: var(--surface2); color: var(--text-muted); }
+    .prose { font-size: 0.88rem; color: var(--text); line-height: 1.75; }
+    .prose p + p { margin-top: 0.65rem; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .level-item { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.65rem 0.85rem; }
+    .level-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 0.2rem; }
+    .level-value { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; }
+    .level-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .stocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 0.75rem; }
+    .stock-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; }
+    .stock-card .card-ticker { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 0.25rem; }
+    .stock-card .card-catalyst { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem; font-weight: 600; }
+    .stock-card .card-note { font-size: 0.83rem; line-height: 1.6; }
+    .watchlist-badge { font-size: 0.68rem; color: var(--accent); font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.03em; }
+    .pill-action-up { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: rgba(52,211,153,0.12); color: var(--green); }
+    .pill-action-down { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: rgba(248,113,113,0.12); color: var(--red); }
+    .pill-action-flat { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: var(--surface2); color: var(--text-muted); }
+    .warning-banner { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--yellow); }
+    footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: 2.5rem; padding: 1.5rem 2rem; text-align: center; }
+    .footer-disclaimer { font-size: 0.78rem; color: var(--text-muted); max-width: 720px; margin: 0 auto 0.5rem; line-height: 1.7; }
+    .footer-disclaimer strong { color: var(--yellow); }
+    .footer-copy { font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono); }
+    @media (max-width: 600px) {
+      header { padding: 1rem; flex-wrap: wrap; }
+      main { padding: 1rem 0.75rem 0; }
+      .stocks-table { font-size: 0.77rem; }
+      .stocks-table th, .stocks-table td { padding: 0.45rem 0.4rem; }
+      .stocks-grid { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="../market_rundown.html">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="24" cy="24" r="23" fill="#1e2330" stroke="#2a3044" stroke-width="1.5"/>
+        <rect x="10" y="27" width="6" height="10" rx="1" fill="#f87171"/>
+        <line x1="13" y1="24" x2="13" y2="27" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13" y1="37" x2="13" y2="40" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="21" y="18" width="6" height="13" rx="1" fill="#34d399"/>
+        <line x1="24" y1="14" x2="24" y2="18" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="31" x2="24" y2="35" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="32" y="13" width="6" height="16" rx="1" fill="#34d399"/>
+        <line x1="35" y1="9"  x2="35" y2="13" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="35" y1="29" x2="35" y2="33" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="13,32 24,23 35,18" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.8"/>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-title">Market Rundown</span>
+        <span class="logo-sub">Daily Pre-Market Brief</span>
+      </div>
+    </a>
+    <div id="last-updated">
+      <a href="index.html" style="margin-right:1rem;">📁 Archive</a>
+      <a href="../market_rundown.html">⬅ Latest</a>
+    </div>
+  </header>
+  <main>
+    <div id="rundowns">
+      
+      <!-- ══════════════════════════════════════════════════════════════
+           ENTRY: 2026-05-04
+           ══════════════════════════════════════════════════════════════ -->
+      <section class="rundown-card" data-date="2026-05-04">
+        <div class="card-header">
+          <span class="card-date">Monday, May 04, 2026</span>
+          <span class="card-badge">PRE-MARKET · MONDAY</span>
+        </div>
+        <details open>
+          <summary><span class="section-icon">🌐</span> Macro Overview</summary>
+          <div class="section-body"><div class="levels-grid">
+  <div class="level-item">
+    <div class="level-label">S&P 500</div>
+    <div class="level-value">4,300</div>
+    <div class="level-note">719.50</div>
+  </div>
+</div>
+<div class="prose"><p>U.S. futures indicate a slight decline as the week begins, with S&amp;P 500 futures trading around 719.50. The market is near highs, but a lighter data calendar may limit volatility. In Asia, markets rallied overnight, contributing to a mixed global sentiment, while European markets weakened, reflecting cautious investor sentiment ahead of U.S. trading <em>via <a href="https://www.stl.news/global-markets-turn-mixed-overnight-may-4-2026/?utm_source=openai">STL News</a></em>. The U.S. dollar strengthened, impacting commodities like gold, which saw a pullback <em>via <a href="https://www.stl.news/global-markets-turn-mixed-overnight-may-4-2026/?utm_source=openai">STL News</a></em>. New York Fed President John Williams is scheduled to speak today, potentially introducing volatility <em>via <a href="https://www.benzinga.com/Opinion/26/05/52246229/trade-strategy-for-spy-qqq-aapl-msft-nvda-googl-meta-and-tsla-16?utm_source=openai">Benzinga</a></em>.</p></div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">📅</span> Economic Calendar</summary>
+          <div class="section-body"><div class="prose"><p>View the full economic calendar for the week on MarketWatch:</p><p><a href="https://www.marketwatch.com/economy-politics/calendar" target="_blank" rel="noopener">�� MarketWatch Economic Calendar →</a></p></div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">📣</span> Earnings Reports</summary>
+          <div class="section-body"><p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;margin-top:0.9rem;">Already Reported</p>
+<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:0.75rem;"><div class="prose"><p>Nothing notable today.</p></div></div>
+<p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;margin-top:0.9rem;">Reporting Today</p>
+<div style="display:flex;flex-direction:column;gap:0.6rem;">
+<div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:var(--radius);padding:0.75rem 1rem;">
+  <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;flex-wrap:wrap;">
+    <span class="ticker">PLTR</span> <span style="font-size:0.68rem;color:var(--accent);font-family:var(--font-mono);font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>
+  </div>
+  <p style="font-size:0.83rem;line-height:1.6;">EPS est. N/A, Rev est. N/A. Key focus: government contracts and commercial growth. <em>via <a href="https://www.fxempire.com/forecasts/article/the-week-ahead-jobs-data-and-amd-earnings-to-test-market-strength-near-highs-1595466?utm_source=openai" target="_blank" rel="noopener">FX Empire</a></em></p>
+</div>
+</div>
+<p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;margin-top:0.9rem;">Other Majors This Week</p>
+<p>Advanced Micro Devices Inc. (AMD) is set to release earnings, providing insights into AI infrastructure and data center spending trends <em>via <a href="https://www.fxempire.com/forecasts/article/the-week-ahead-jobs-data-and-amd-earnings-to-test-market-strength-near-highs-1595466?utm_source=openai">FX Empire</a></em>.</p></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">🏷️</span> Analyst Ratings</summary>
+          <div class="section-body"><p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;margin-top:0.9rem;">Watchlist Names</p>
+<table class="stocks-table" style="margin-bottom:1.1rem;">
+<thead>
+<tr>
+<th style="text-align:left">Ticker</th>
+<th style="text-align:left">Firm</th>
+<th style="text-align:left">Action</th>
+<th style="text-align:left">New Rating</th>
+<th style="text-align:left">PT</th>
+<th style="text-align:left">Setup Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">WDC</td>
+<td style="text-align:left">Citigroup</td>
+<td style="text-align:left">MAINTAIN</td>
+<td style="text-align:left">Strong Buy</td>
+<td style="text-align:left">$405</td>
+<td style="text-align:left">Raised PT from $335. <em>via <a href="https://stockanalysis.com/stocks/wdc/ratings/?utm_source=openai">Stock Analysis</a></em></td>
+</tr>
+<tr>
+<td style="text-align:left">LITE</td>
+<td style="text-align:left">JP Morgan</td>
+<td style="text-align:left">MAINTAIN</td>
+<td style="text-align:left">Buy</td>
+<td style="text-align:left">$950</td>
+<td style="text-align:left">Raised PT from $565. <em>via <a href="https://stockanalysis.com/stocks/lite/ratings/?utm_source=openai">Stock Analysis</a></em></td>
+</tr>
+<tr>
+<td style="text-align:left">TER</td>
+<td style="text-align:left">Goldman Sachs</td>
+<td style="text-align:left">MAINTAIN</td>
+<td style="text-align:left">Strong Buy</td>
+<td style="text-align:left">$300</td>
+<td style="text-align:left">Raised PT from $230. <em>via <a href="https://stockanalysis.com/stocks/ter/ratings/?utm_source=openai">Stock Analysis</a></em></td>
+</tr>
+</tbody>
+</table>
+<p style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:0.65rem;margin-top:0.9rem;">Other Notable</p>
+<p>Nothing notable today.</p></div>
+        </details>
+        <details open>
+          <summary><span class="section-icon">🎯</span> Stocks in Play</summary>
+          <div class="section-body"><div class="stocks-grid">
+  <div class="stock-card" style="border-left: 3px solid var(--yellow);">
+    <div class="card-ticker">MU <span class="watchlist-badge">⚠ WATCHLIST</span></div>
+    <div class="card-catalyst">Catalyst type — Upcoming earnings report.</div>
+    <div class="card-note">Why it moves today — Investors anticipate insights into AI infrastructure and data center spending trends. *via <a href="https://www.fxempire.com/forecasts/article/the-week-ahead-jobs-data-and-amd-earnings-to-test-market-strength-near-highs-1595466?utm_source=openai" target="_blank" rel="noopener">FX Empire</a>*</div>
+  </div>
+  <div class="stock-card" style="border-left: 3px solid var(--yellow);">
+    <div class="card-ticker">PLTR <span class="watchlist-badge">⚠ WATCHLIST</span></div>
+    <div class="card-catalyst">Catalyst type — Upcoming earnings report.</div>
+    <div class="card-note">Why it moves today — Expected to provide signals on AI software demand across enterprise and government sectors. *via <a href="https://www.fxempire.com/forecasts/article/the-week-ahead-jobs-data-and-amd-earnings-to-test-market-strength-near-highs-1595466?utm_source=openai" target="_blank" rel="noopener">FX Empire</a>*</div>
+  </div>
+  <div class="stock-card" style="border-left: 3px solid var(--yellow);">
+    <div class="card-ticker">STX</div>
+    <div class="card-catalyst">Catalyst type — Pre-market gain of 7.91%.</div>
+    <div class="card-note">Why it moves today — Positive earnings report or favorable analyst coverage. *via <a href="https://www.chartmill.com/news/DLR/Chartmill-46836-Discover-the-top-SP500-movers-in-Mondays-pre-market-session?utm_source=openai" target="_blank" rel="noopener">Chartmill</a>*</div>
+  </div>
+</div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">🧭</span> Market Themes</summary>
+          <div class="section-body"><div class="prose"><p><strong>Artificial Intelligence (AI) Economy.</strong> Rapid investment in AI is driving economic growth, but concerns about job losses and productivity gains remain. <em>via <a href="https://www.axios.com/2026/01/05/economy-tariffs-ai?utm_source=openai">Axios</a></em></p>
+<p><strong>Tax Cut Boost.</strong> The "One Big, Beautiful Bill Act" is expected to stimulate early 2026 GDP growth significantly. <em>via <a href="https://www.axios.com/2026/01/05/economy-tariffs-ai?utm_source=openai">Axios</a></em></p>
+<p><strong>Trade Policy Uncertainty.</strong> A pending Supreme Court decision could affect tariff impositions, influencing market dynamics. <em>via <a href="https://www.axios.com/2026/01/05/economy-tariffs-ai?utm_source=openai">Axios</a></em></p>
+<p><strong>Federal Reserve Leadership.</strong> The upcoming appointment of a new Fed chair could impact monetary policy direction. <em>via <a href="https://www.axios.com/2026/01/05/economy-tariffs-ai?utm_source=openai">Axios</a></em></p>
+<p><strong>Affordability and Midterms.</strong> Inflation remains a political issue, with the administration adjusting tariff plans. <em>via <a href="https://www.axios.com/2026/01/05/economy-tariffs-ai?utm_source=openai">Axios</a></em></p></div>
+<details style="margin-top:0.75rem;border:1px solid var(--border);border-radius:var(--radius);">
+  <summary style="padding:0.75rem 1rem;"><span class="section-icon">⚠️</span> Key Risks &amp; Conflicting Signals</summary>
+  <div class="section-body"><table class="stocks-table" style="font-family:var(--font);font-size:0.845rem;">
+<thead>
+<tr>
+<th style="text-align:left">Risk</th>
+<th style="text-align:left">Signal / Trigger</th>
+<th style="text-align:left">Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">AI-Induced Job Losses</td>
+<td style="text-align:left">Rapid AI adoption</td>
+<td style="text-align:left">Potential increase in unemployment and social unrest.</td>
+</tr>
+<tr>
+<td style="text-align:left">Trade Policy Uncertainty</td>
+<td style="text-align:left">Pending Supreme Court decision on tariffs</td>
+<td style="text-align:left">Market volatility due to potential changes in trade dynamics.</td>
+</tr>
+<tr>
+<td style="text-align:left">Federal Reserve Leadership Change</td>
+<td style="text-align:left">Appointment of new Fed chair</td>
+<td style="text-align:left">Uncertainty in monetary policy direction affecting investor confidence.</td>
+</tr>
+<tr>
+<td style="text-align:left">Inflation Concerns</td>
+<td style="text-align:left">Persistent 2.7% annual inflation</td>
+<td style="text-align:left">Erosion of purchasing power and potential tightening of monetary policy.</td>
+</tr>
+</tbody>
+</table></div>
+</details></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">📋</span> Secondary Names</summary>
+          <div class="section-body"><table class="stocks-table">
+<thead>
+<tr>
+<th>Ticker</th>
+<th>Catalyst</th>
+<th>Brief</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COHR</td>
+<td>Pre-market gain</td>
+<td>Positive earnings report or favorable analyst coverage.</td>
+</tr>
+<tr>
+<td>LITE</td>
+<td>Pre-market gain</td>
+<td>Positive earnings report or favorable analyst coverage.</td>
+</tr>
+<tr>
+<td>SNDK</td>
+<td>Pre-market gain</td>
+<td>Positive earnings report or favorable analyst coverage.</td>
+</tr>
+</tbody>
+</table></div>
+        </details>
+      </section>
+    </div>
+    <footer>
+      <p class="footer-disclaimer">
+        <strong>⚠️ For market research and informational purposes only.</strong>
+        This briefing does not constitute financial advice, investment recommendations, or an offer to buy or sell any security.
+        All content is aggregated from publicly available sources and is provided as-is without warranty of accuracy or completeness.
+        Past market performance is not indicative of future results. Always conduct your own due diligence and consult a qualified
+        financial advisor before making any investment decisions.
+      </p>
+      <p class="footer-copy">Daily Market Rundown &nbsp;·&nbsp; Generated automatically from public sources</p>
+    </footer>
+  </main>
+</body>
+</html>
