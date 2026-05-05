@@ -11,7 +11,10 @@ import sys
 import os
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import markdown as md_lib
+
+CT = ZoneInfo("America/Chicago")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DASHBOARD_FILE = os.path.join(SCRIPT_DIR, "market_rundown.html")
@@ -795,7 +798,7 @@ def _extract_headline(md_text: str) -> str:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def build_or_update(md_file: str):
-    timestamp = datetime.now().strftime("%b %d, %Y · %I:%M %p CT")
+    timestamp = datetime.now(CT).strftime("%b %d, %Y · %I:%M %p CT")
 
     # Read markdown
     with open(md_file, "r", encoding="utf-8") as f:
