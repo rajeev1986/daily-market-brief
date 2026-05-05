@@ -93,7 +93,7 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Daily rundown ${RUN_DATE}"
-            git push origin main
+            git push origin main || { echo "::error::git push failed"; exit 1; }
             echo "Pushed. GitHub Pages will update in ~30 seconds."
             echo "Live at: https://rajeev1986.github.io/daily-market-brief/market_rundown.html"
           fi

@@ -75,8 +75,9 @@ def search(client: OpenAI, prompt: str) -> str:
         for item in response.output:
             if hasattr(item, "content"):
                 for block in item.content:
-                    if hasattr(block, "text"):
+                    if hasattr(block, "text") and block.text:
                         return block.text
+        log.warning("Search returned no text content — response structure may have changed")
     except Exception as exc:
         log.warning("Search failed: %s", exc)
     return ""
@@ -249,25 +250,33 @@ RULES:
 """
 
     log.info("Generating markdown with %s...", SYNTHESIS_MODEL)
-    response = client.chat.completions.create(
-        model=SYNTHESIS_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a professional pre-market research analyst. "
-                    "Synthesize raw research into a clean, structured daily market briefing. "
-                    "Be concise, factual, and scannable. Cite sources inline with real URLs. "
-                    "Never fabricate data or invent sources."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.2,
-        max_tokens=3000,
-    )
+    try:
+        response = client.chat.completions.create(
+            model=SYNTHESIS_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a professional pre-market research analyst. "
+                        "Synthesize raw research into a clean, structured daily market briefing. "
+                        "Be concise, factual, and scannable. Cite sources inline with real URLs. "
+                        "Never fabricate data or invent sources."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.2,
+            max_tokens=3000,
+        )
+    except Exception as exc:
+        log.error("Markdown generation API call failed: %s", exc)
+        raise
 
     content = response.choices[0].message.content or ""
+    if len(content.strip()) < 100:
+        log.error("Generated markdown is too short (%d chars) — aborting", len(content.strip()))
+        raise ValueError("LLM returned empty or near-empty markdown")
+
     header  = f"# Daily Market Rundown — {date_str}\n\n"
     return header + warning + content
 
@@ -297,12 +306,15 @@ def main() -> None:
         sys.exit(1)
 
     # ── Determine run date ────────────────────────────────────────────────────
-    run_date_str = os.environ.get("RUN_DATE", "")
+    run_date_str = os.environ.get("RUN_DATE", "").strip()
     if run_date_str:
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", run_date_str):
+            log.error("Invalid RUN_DATE format '%s' — expected YYYY-MM-DD", run_date_str)
+            sys.exit(1)
         try:
             today = date.fromisoformat(run_date_str)
         except ValueError:
-            log.error("Invalid RUN_DATE: %s", run_date_str)
+            log.error("Invalid RUN_DATE value: %s", run_date_str)
             sys.exit(1)
     else:
         today = datetime.now(CT).date()
@@ -333,18 +345,34 @@ def main() -> None:
     log.info("Usable search results: %d / %d", usable, len(research_data))
 
     if usable == 0:
-        log.error("No research data returned. Aborting.")
+        log.error("All searches failed — no data returned. Aborting.")
         sys.exit(1)
+    if usable < len(research_data):
+        log.warning("%d of %d searches returned no data — briefing may be incomplete",
+                    len(research_data) - usable, len(research_data))
 
     # ── 2. Generate markdown ──────────────────────────────────────────────────
-    markdown = generate_markdown(client, research_data, today)
+    try:
+        markdown = generate_markdown(client, research_data, today)
+    except Exception as exc:
+        log.error("Failed to generate markdown: %s", exc)
+        sys.exit(1)
 
     # ── 3. Save markdown ──────────────────────────────────────────────────────
-    md_path.write_text(markdown, encoding="utf-8")
-    log.info("Saved %s", md_path.name)
+    try:
+        md_path.write_text(markdown, encoding="utf-8")
+        log.info("Saved %s", md_path.name)
+    except OSError as exc:
+        log.error("Failed to write %s: %s", md_path, exc)
+        sys.exit(1)
 
     # ── 4. Build HTML (dashboard + archive) via build_dashboard.py ───────────
-    build_html(md_path)
+    try:
+        build_html(md_path)
+    except Exception as exc:
+        log.error("HTML build failed: %s", exc)
+        # Don't exit — markdown was saved successfully, HTML can be rebuilt manually
+        log.error("Markdown saved at %s — re-run: python build_dashboard.py %s", md_path.name, md_path.name)
 
     log.info("=" * 60)
     log.info("Pipeline complete — %s", iso_date)
