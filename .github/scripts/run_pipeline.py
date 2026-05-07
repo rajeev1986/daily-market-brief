@@ -279,7 +279,7 @@ RULES:
                 {"role": "user", "content": prompt},
             ],
             temperature=0.2,
-            max_tokens=3000,
+            max_tokens=4500,
         )
     except Exception as exc:
         log.error("Markdown generation API call failed: %s", exc)
@@ -345,9 +345,11 @@ def main() -> None:
         sys.exit(0)
 
     # ── Guard: skip if rundown already exists ─────────────────────────────────
+    # Set FORCE_RERUN=1 in the workflow env to bypass this guard (e.g. for reruns)
     md_path = REPO_DIR / f"rundown_{iso_date}.md"
-    if md_path.exists():
+    if md_path.exists() and not os.environ.get("FORCE_RERUN"):
         log.info("Rundown for %s already exists — skipping to avoid duplicate billing.", iso_date)
+        log.info("Set FORCE_RERUN=1 to override this guard.")
         sys.exit(0)
 
     client = OpenAI(api_key=api_key)

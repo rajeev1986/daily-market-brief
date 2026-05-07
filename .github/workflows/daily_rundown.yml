@@ -24,6 +24,10 @@ on:
         description: "Run for a specific date (YYYY-MM-DD). Leave blank for today."
         required: false
         default: ""
+      force_rerun:
+        description: "Set to '1' to regenerate even if today's rundown already exists."
+        required: false
+        default: ""
 
 # ── Force Node.js 24 for all actions (suppresses Node.js 20 deprecation warning)
 env:
@@ -75,6 +79,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           RUN_DATE: ${{ env.RUN_DATE }}
+          FORCE_RERUN: ${{ github.event.inputs.force_rerun }}
         run: python .github/scripts/run_pipeline.py
 
       # ── 6. Commit and push ────────────────────────────────────────────

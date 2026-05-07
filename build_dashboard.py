@@ -272,23 +272,22 @@ def build_macro_section(md_text: str) -> str:
 
 def build_calendar_section(md_text: str) -> str:
     """Economic Calendar: just render the MarketWatch link."""
-    # If the section only contains a link, render it cleanly
     if "marketwatch.com/economy-politics/calendar" in md_text:
         return (
             '<div class="prose">'
             '<p>View the full economic calendar for the week on MarketWatch:</p>'
             '<p><a href="https://www.marketwatch.com/economy-politics/calendar" '
-            'target="_blank" rel="noopener">�� MarketWatch Economic Calendar →</a></p>'
+            'target="_blank" rel="noopener">📅 MarketWatch Economic Calendar →</a></p>'
             '</div>'
         )
-    # Fallback: render as prose
     return f'<div class="prose">{to_html(md_text)}</div>'
 
 
 def build_stocks_section(md_text: str) -> str:
     """Render Stocks in Play as a card grid."""
     # Split on bold ticker lines: **TICKER** or **TICKER** ⭐
-    entries = re.split(r'\n(?=\*\*[A-Z/]+)', md_text.strip())
+    # Handle tickers with slashes (GOOGL/META), ampersands, dots
+    entries = re.split(r'\n(?=\*\*[A-Z][A-Z0-9 /&.-]*\*\*)', md_text.strip())
     if len(entries) <= 1:
         # Fallback: plain prose
         return f'<div class="prose">{to_html(md_text)}</div>'
@@ -301,8 +300,8 @@ def build_stocks_section(md_text: str) -> str:
         lines = entry.split("\n")
         header = lines[0]
 
-        # Extract ticker
-        ticker_match = re.match(r'\*{0,2}([A-Z][A-Z0-9 /&.-]+?)\*{0,2}(?:\s|$)', header)
+        # Extract ticker — handle **TICKER** and **TICKER / TICKER2** patterns
+        ticker_match = re.match(r'\*\*([A-Z][A-Z0-9 /&.-]+?)\*\*', header)
         ticker = ticker_match.group(1).strip() if ticker_match else re.sub(r'\*+', '', header.split()[0])
 
         is_watchlist = "⭐" in header or "Watchlist" in header
@@ -316,20 +315,23 @@ def build_stocks_section(md_text: str) -> str:
         # Detect border color from catalyst/note keywords
         border_color = "var(--accent)"
         lower = (catalyst + note).lower()
-        if any(w in lower for w in ["gap down", "miss", "slashed", "downgrade", "risk", "selloff"]):
+        if any(w in lower for w in ["gap down", "miss", "slashed", "downgrade", "risk", "selloff", "cut dividend"]):
             border_color = "var(--red)"
-        elif any(w in lower for w in ["beat", "surge", "upgrade", "record", "buyback", "raised guidance"]):
+        elif any(w in lower for w in ["beat", "surge", "upgrade", "record", "buyback", "raised guidance", "blowout"]):
             border_color = "var(--green)"
-        elif any(w in lower for w in ["reports", "pending", "earnings", "setup"]):
+        elif any(w in lower for w in ["reports", "pending", "earnings", "setup", "watch"]):
             border_color = "var(--yellow)"
 
         watchlist_badge = (
-            ' <span class="watchlist-badge">⚠ WATCHLIST</span>' if is_watchlist else ""
+            ' <span class="watchlist-badge">⭐ WATCHLIST</span>' if is_watchlist else ""
         )
 
-        # Convert note markdown links
-        note_html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank" rel="noopener">\1</a>', note)
-        catalyst_html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank" rel="noopener">\1</a>', catalyst)
+        # Convert markdown links in note and catalyst
+        def md_links(text):
+            return re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank" rel="noopener">\1</a>', text)
+
+        note_html = md_links(note)
+        catalyst_html = md_links(catalyst)
 
         html += (
             f'  <div class="stock-card" style="border-left: 3px solid {border_color};">\n'
@@ -417,7 +419,7 @@ def build_earnings_section(md_text: str) -> str:
                                          "AMZN","GLD","SPY","META","AAPL","ROKU"}
                     wl_badge = (
                         ' <span style="font-size:0.68rem;color:var(--accent);font-family:var(--font-mono);'
-                        'font-weight:700;letter-spacing:0.03em;">⚠ WATCHLIST</span>'
+                        'font-weight:700;letter-spacing:0.03em;">⭐ WATCHLIST</span>'
                         if ticker in watchlist_tickers else ""
                     )
                     move_badge = (
@@ -658,12 +660,13 @@ def trim_entries(html: str) -> str:
     markers = list(pattern.finditer(html))
     if len(markers) <= MAX_ENTRIES:
         return html
+    # Remove all entries from the (MAX_ENTRIES+1)th onward
     cutoff = markers[MAX_ENTRIES].start()
-    # Find the closing </section> after the last entry to keep
+    # Find the FIRST </section> after cutoff — not the last — to remove exactly one entry at a time
     tail = html[cutoff:]
-    last_close = tail.rfind("</section>")
-    if last_close != -1:
-        html = html[:cutoff] + html[cutoff + last_close + len("</section>"):]
+    first_close = tail.find("</section>")
+    if first_close != -1:
+        html = html[:cutoff] + html[cutoff + first_close + len("</section>"):]
     return html
 
 
