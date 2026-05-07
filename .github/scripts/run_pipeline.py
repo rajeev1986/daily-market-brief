@@ -92,19 +92,28 @@ def research(client: OpenAI, today: date) -> dict[str, str]:
     wl       = ", ".join(WATCHLIST)
     results  = {}
 
+    # Approved sources used across all searches
+    SOURCES_MACRO    = "Reuters, Bloomberg, CNBC, MarketWatch, Financial Times, Yahoo Finance, Barron's, The Wall Street Journal, PBS NewsHour, Axios"
+    SOURCES_EARNINGS = "Reuters, CNBC, MarketWatch, Yahoo Finance, The Wall Street Journal, Barron's, Axios"
+    SOURCES_RATINGS  = "Reuters, Bloomberg, CNBC, MarketWatch, Yahoo Finance, The Wall Street Journal, Barron's"
+    SOURCES_STOCKS   = "Reuters, CNBC, MarketWatch, Yahoo Finance, Financial Times, Barron's, Axios"
+
     # ── Search 1: Macro + Watchlist scan ─────────────────────────────────────
     log.info("Search 1/3 — macro + watchlist")
     results["macro"] = search(client,
         f"Today is {date_str}. Cover two things:\n\n"
-        "1) PRE-MARKET MACRO: overnight futures (S&P 500, Nasdaq, Dow with % moves), "
-        "global market moves (Asia close, Europe open), Fed commentary, geopolitical events, "
-        "currency moves (USD, JPY, EUR), WTI crude, Brent crude, gold price. "
-        "Sources: Reuters, Bloomberg, CNBC, MarketWatch, Yahoo Finance, Barron's.\n\n"
+        "1) PRE-MARKET MACRO: Find the CURRENT pre-market levels for S&P 500 futures, "
+        "Nasdaq-100 futures, and Dow Jones futures (actual numeric values and % change). "
+        "Also cover: global market moves (Asia close, Europe open), Fed commentary, "
+        "geopolitical events, currency moves (USD, JPY, EUR), WTI crude price, "
+        "Brent crude price, gold spot price. "
+        f"Sources: {SOURCES_MACRO}.\n\n"
         f"2) WATCHLIST SCAN: check each of these tickers for earnings, analyst rating changes, "
         f"significant news catalysts, or unusual pre-market price action today: {wl}. "
         "Only report tickers with something actionable — skip the rest silently. "
-        "Sources: Benzinga, Yahoo Finance, CNBC, MarketWatch.\n\n"
-        "Summarize each part clearly. Cite sources inline."
+        f"Sources: {SOURCES_STOCKS}.\n\n"
+        "Summarize each part clearly. For index levels use the ACTUAL current numbers. "
+        "Cite each fact with the source name and URL in this format: [Source Name](url)"
     )
 
     # ── Search 2: Earnings + Analyst Ratings ─────────────────────────────────
@@ -116,13 +125,13 @@ def research(client: OpenAI, today: date) -> dict[str, str]:
         "For each already-reported name: ticker, EPS actual vs estimate, revenue actual vs estimate, "
         "% stock reaction, one-sentence takeaway. "
         "For names reporting today: ticker, time (PM/AH), EPS estimate, revenue estimate, key focus. "
-        "Sources: Earnings Whispers, EarningsHub, Yahoo Finance, MarketWatch, CNBC.\n\n"
+        f"Sources: {SOURCES_EARNINGS}.\n\n"
         f"2) ANALYST RATINGS: today's upgrades, downgrades, initiations, and price target changes. "
         f"Watchlist tickers first: {wl}. "
         "For each: ticker, firm, action (UPGRADE/DOWNGRADE/INITIATE/PT RAISE/PT CUT), "
         "new rating, new price target if available, one-sentence thesis. "
-        "Sources: Benzinga, MarketBeat, TheStreet, TipRanks, Zacks.\n\n"
-        "Cite sources inline for both."
+        f"Sources: {SOURCES_RATINGS}.\n\n"
+        "Cite each fact with source name and URL: [Source Name](url)"
     )
 
     # ── Search 3: Stocks in Play + Market Themes ─────────────────────────────
@@ -133,12 +142,12 @@ def research(client: OpenAI, today: date) -> dict[str, str]:
         f"news catalysts today. Watchlist tickers first: {wl}. "
         "For each: ticker, catalyst (one phrase), why it could move today (one sentence), "
         "whether it is a watchlist name. "
-        "Sources: Benzinga, Finviz, MarketBeat, Yahoo Finance, CNBC pre-market movers.\n\n"
+        f"Sources: {SOURCES_STOCKS}.\n\n"
         "2) MARKET THEMES: 4-5 dominant sector narratives, ETF flows, and macro themes "
         "driving today's action. Include a Key Risks & Conflicting Signals table at the end "
         "with columns: Risk | Signal/Trigger | Implication. "
-        "Sources: ETF.com, Sector SPDRs, Yahoo Finance, MarketWatch, Seeking Alpha.\n\n"
-        "Cite sources inline for both."
+        f"Sources: {SOURCES_MACRO}.\n\n"
+        "Cite each fact with source name and URL: [Source Name](url)"
     )
 
     # Optional: uncomment to re-enable Secondary Names + Week Ahead
@@ -187,10 +196,12 @@ OUTPUT EXACTLY these 7 sections in this order (use ## headings with numbers):
 ---
 
 ## 1. Macro Overview
-Open with a key-levels table:
-| Index | Close (Thu) | Fri Futures | WTD |
+Open with a key-levels table using ACTUAL current values from the research (not placeholders):
+| Index / Asset | Level | Change | Note |
+Include rows for: S&P 500 Futures, Nasdaq-100 Futures, Dow Futures, WTI Crude, Brent Crude, Gold, USD/JPY
+Use real numbers from the research. If a value is unavailable write "N/A".
 Then 2-3 prose paragraphs covering the main overnight narrative, geopolitical context, and Fed posture.
-Cite sources inline: *via [Source](url)*
+Cite sources as clickable markdown links: [Source Name](https://url.com)
 
 ## 2. Economic Calendar
 Write exactly this line and nothing else:
@@ -198,12 +209,12 @@ Write exactly this line and nothing else:
 
 ## 3. Earnings Reports
 ### Already Reported
-One entry per ticker in this format (bold ticker, then dash, then details):
-**TICKER** ⭐ (if watchlist) — EPS $X.XX vs $X.XX est. Revenue $XB vs $XB est. Stock +/-X%. One-sentence takeaway. *via [Source](url)*
+One entry per ticker in this format:
+**TICKER** ⭐ (if watchlist) — EPS $X.XX vs $X.XX est. Revenue $XB vs $XB est. Stock +/-X%. One-sentence takeaway. [Source Name](url)
 
 ### Reporting Today
 One bullet per ticker:
-- **TICKER** (Company name) — EPS est. $X.XX, Rev est. $XB. Key focus: one sentence. Stock +/-X% if already reacted. *via [Source](url)*
+- **TICKER** (Company name) — EPS est. $X.XX, Rev est. $XB. Key focus: one sentence. [Source Name](url)
 
 ### Other Majors This Week
 Brief prose for notable non-watchlist names.
@@ -222,12 +233,12 @@ One entry per stock in this EXACT format (no table — use bold ticker + two lin
 
 **TICKER** ⭐ Watchlist (include ⭐ Watchlist only if it is a watchlist name)
 Catalyst type — one-sentence description of the catalyst.
-Why it moves today — one sentence on the specific intraday setup. *via [Source](url)*
+Why it moves today — one sentence on the specific intraday setup. [Source Name](url)
 
 Watchlist names first. Order by expected volatility (highest first).
 
 ## 6. Market Themes
-4-5 named themes. Each: **Bold Theme Title.** 2-3 sentence explanation. *via [Source](url)*
+4-5 named themes. Each: **Bold Theme Title.** 2-3 sentence explanation. [Source Name](url)
 
 At the end, add a Key Risks & Conflicting Signals table:
 **Key Risks & Conflicting Signals**
@@ -239,8 +250,10 @@ At the end, add a Key Risks & Conflicting Signals table:
 ---
 
 RULES:
+- Use ACTUAL values from the research — never use placeholder values like $735 or TBD
+- All source citations MUST be markdown links: [Source Name](https://actual-url.com)
+- Do NOT use *via Source* italic format — always use [Source Name](url) hyperlinks
 - Summarize — do not paste research verbatim
-- Cite each major data point inline with real URLs where known
 - If a section has no data, write "Nothing notable today."
 - Do not add any text before ## 1. Macro Overview
 - Do not add any sections beyond the 7 listed above

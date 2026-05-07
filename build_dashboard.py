@@ -179,14 +179,22 @@ OPEN_BY_DEFAULT = {"Macro Overview", "Stocks in Play"}
 # ── Markdown helpers ──────────────────────────────────────────────────────────
 
 def to_html(text: str) -> str:
-    """Convert markdown to HTML with table + nl2br support."""
-    return md_lib.markdown(text.strip(), extensions=["tables", "nl2br"])
+    """Convert markdown to HTML with table + nl2br support.
+    Also converts any leftover *via Source* italic citations into styled spans."""
+    html = md_lib.markdown(text.strip(), extensions=["tables", "nl2br"])
+    # Convert *via Source* → styled italic citation (fallback for non-linked sources)
+    html = re.sub(
+        r'\*via ([^*<]+)\*',
+        r'<em style="font-size:0.8rem;color:var(--text-muted);">via \1</em>',
+        html
+    )
+    return html
 
 
 # ── Section parsers ───────────────────────────────────────────────────────────
 
 def build_macro_section(md_text: str) -> str:
-    """Parse the key-levels table (if present) into .levels-grid tiles, then prose."""
+    """Parse the key-levels table into .levels-grid tiles, then prose."""
     lines = md_text.strip().split("\n")
     table_lines, prose_lines = [], []
     in_table = False
@@ -204,14 +212,17 @@ def build_macro_section(md_text: str) -> str:
 
     html = ""
 
-    # Parse key-levels table into tiles
+    # Parse key-levels table into tiles — skip header and separator rows
     if table_lines:
         rows = []
         for line in table_lines:
-            if "---" in line or re.match(r"\|\s*Index\s*\|", line, re.I):
+            if "---" in line:
                 continue
             cells = [c.strip() for c in line.strip("|").split("|")]
-            if len(cells) >= 2 and cells[0]:
+            # Skip header row (first cell contains "Index" or "Asset")
+            if cells and re.match(r'(?i)index|asset', cells[0]):
+                continue
+            if len(cells) >= 2 and cells[0] and cells[0] != "—":
                 rows.append(cells)
 
         if rows:
@@ -219,17 +230,33 @@ def build_macro_section(md_text: str) -> str:
             for row in rows:
                 label = row[0]
                 value = row[1] if len(row) > 1 else "—"
-                note  = row[2] if len(row) > 2 else ""
+                change = row[2] if len(row) > 2 else ""
+                note   = row[3] if len(row) > 3 else change  # fallback
+
+                # Skip placeholder/empty rows
+                if value in ("TBD", "N/A", "—", "") and not change:
+                    continue
+
                 # Detect direction for color
                 val_class = ""
-                if any(c in value for c in ["+", "↑"]):
+                chg_str = change + value
+                if re.search(r'[+↑]', chg_str) and "N/A" not in chg_str:
                     val_class = " up"
-                elif any(c in value for c in ["−", "-", "↓"]) and value not in ["—", "-"]:
+                elif re.search(r'[-−↓]', chg_str) and chg_str not in ["—", "-", "N/A"]:
                     val_class = " down"
+
+                # Format change as a small badge next to value
+                change_html = ""
+                if change and change not in ("—", "N/A", ""):
+                    chg_class = "up" if "+" in change or "↑" in change else (
+                        "down" if any(c in change for c in ["-", "−", "↓"]) else "flat"
+                    )
+                    change_html = f' <span class="pill {chg_class}" style="font-size:0.7rem;">{change}</span>'
+
                 html += (
                     f'  <div class="level-item">\n'
                     f'    <div class="level-label">{label}</div>\n'
-                    f'    <div class="level-value{val_class}">{value}</div>\n'
+                    f'    <div class="level-value{val_class}">{value}{change_html}</div>\n'
                     f'    <div class="level-note">{note}</div>\n'
                     f'  </div>\n'
                 )
