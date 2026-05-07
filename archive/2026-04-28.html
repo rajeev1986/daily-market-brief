@@ -5,437 +5,405 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Market Rundown — Tuesday, April 28, 2026</title>
   <style>
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:#0d0f14; --surface:#161a22; --surface-alt:#1e2330; --border:#2a2f3d;
-      --accent:#4f8ef7; --accent-dim:#2d5299; --green:#3ecf6e; --red:#f75f5f;
-      --yellow:#f7c948; --text:#e2e6f0; --text-muted:#7a8299; --radius:8px;
-      --font:'Segoe UI',system-ui,-apple-system,sans-serif;
-      --mono:'Cascadia Code','Fira Code','Consolas',monospace;
+      --bg: #0d0f14; --surface: #161a23; --surface2: #1e2330; --border: #2a3044;
+      --accent: #4a9eff; --accent-dim: #1e3a5f; --green: #34d399; --red: #f87171;
+      --yellow: #fbbf24; --text: #e2e8f0; --text-muted: #7a8499; --text-dim: #4a5568;
+      --radius: 8px; --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
     }
-    body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:15px; line-height:1.6; padding:0 0 60px; }
-    a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
-    #page-header { background:var(--surface); border-bottom:1px solid var(--border); padding:16px 32px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
-    #page-header h1 { font-size:1.1rem; font-weight:700; }
-    .nav-links { display:flex; gap:12px; margin-left:auto; font-size:0.82rem; font-family:var(--mono); }
-    .nav-links a { background:var(--surface-alt); border:1px solid var(--border); border-radius:5px; padding:5px 12px; }
-    .nav-links a:hover { background:var(--border); text-decoration:none; }
-    #main { max-width:960px; margin:0 auto; padding:32px 24px; }
-    .rundown-entry { margin-bottom:40px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-    .rundown-entry-header { background:var(--surface-alt); padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
-    .rundown-entry-header h2 { font-size:1.05rem; font-weight:600; color:var(--accent); font-family:var(--mono); }
-    .rundown-entry-header .entry-meta { font-size:0.78rem; color:var(--text-muted); }
-    details { border-bottom:1px solid var(--border); } details:last-child { border-bottom:none; }
-    summary { padding:12px 20px; cursor:pointer; font-weight:600; font-size:0.88rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); background:var(--surface); list-style:none; display:flex; align-items:center; gap:8px; user-select:none; transition:background 0.15s,color 0.15s; }
-    summary::-webkit-details-marker { display:none; }
-    summary::before { content:'▶'; font-size:0.65rem; color:var(--accent-dim); transition:transform 0.2s; flex-shrink:0; }
-    details[open]>summary::before { transform:rotate(90deg); }
-    details[open]>summary { color:var(--text); background:var(--surface-alt); } summary:hover { background:var(--surface-alt); color:var(--text); }
-    .section-body { padding:16px 20px; background:var(--surface); }
-    .section-body p { margin-bottom:10px; } .section-body p:last-child { margin-bottom:0; }
-    .section-body ul { padding-left:18px; margin-bottom:10px; } .section-body li { margin-bottom:6px; }
-    .stock-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; padding:16px 20px; background:var(--surface); }
-    .stock-card { background:var(--surface-alt); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
-    .stock-card .ticker { font-family:var(--mono); font-size:1rem; font-weight:700; color:var(--accent); margin-bottom:4px; }
-    .stock-card .catalyst { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
-    .stock-card .note { font-size:0.85rem; color:var(--text); line-height:1.5; }
-    .badge { display:inline-block; font-size:0.7rem; font-family:var(--mono); padding:2px 7px; border-radius:4px; font-weight:600; margin-left:6px; vertical-align:middle; }
-    .badge-up { background:#1a3d2b; color:var(--green); } .badge-down { background:#3d1a1a; color:var(--red); } .badge-watch { background:#3d3010; color:var(--yellow); }
-    .ratings-table, .calendar-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-    .ratings-table th, .calendar-table th { text-align:left; padding:8px 12px; background:var(--surface-alt); color:var(--text-muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--border); }
-    .ratings-table td, .calendar-table td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
-    .ratings-table tr:last-child td, .calendar-table tr:last-child td { border-bottom:none; }
-    .ratings-table tr:hover td, .calendar-table tr:hover td { background:var(--surface-alt); }
-    .ticker-cell { font-family:var(--mono); font-weight:700; color:var(--accent); }
-    .warning-banner { background:#3d2e00; border:1px solid #7a5c00; border-radius:var(--radius); padding:10px 16px; margin:12px 20px; font-size:0.88rem; color:var(--yellow); }
-    #page-footer { border-top:1px solid var(--border); background:var(--surface); padding:24px 32px; margin-top:40px; text-align:center; }
-    #page-footer .footer-disclaimer { font-size:0.78rem; color:var(--text-muted); max-width:720px; margin:0 auto 10px; line-height:1.6; }
-    #page-footer .footer-disclaimer strong { color:var(--yellow); }
-    #page-footer .footer-copy { font-size:0.75rem; color:var(--text-muted); font-family:var(--mono); opacity:0.6; }
-    #logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-    #logo-text { display:flex; flex-direction:column; line-height:1.2; }
-    #logo-text .logo-title { font-size:1rem; font-weight:700; color:var(--text); }
-    #logo-text .logo-sub { font-size:0.65rem; color:var(--text-muted); font-family:var(--mono); letter-spacing:0.06em; text-transform:uppercase; }
-    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg); }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-    @media (max-width: 640px) {
-      #page-header { padding:12px 16px; flex-wrap:wrap; gap:10px; }
-      #logo { flex:1 1 100%; }
-      #logo-text .logo-title { font-size:0.95rem; }
-      #logo-text .logo-sub { display:none; }
-      .nav-links { margin-left:0; width:100%; justify-content:flex-end; }
-      #main { padding:16px 12px; }
-      .rundown-entry-header { flex-direction:column; align-items:flex-start; gap:4px; padding:12px 14px; }
-      .rundown-entry-header h2 { font-size:0.95rem; }
-      summary { padding:11px 14px; font-size:0.82rem; }
-      .section-body { padding:14px 14px; font-size:0.88rem; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      .ratings-table, .calendar-table { font-size:0.78rem; min-width:480px; }
-      .ratings-table th, .ratings-table td, .calendar-table th, .calendar-table td { padding:6px 8px; }
-      .stock-grid { grid-template-columns:1fr; padding:12px 14px; gap:10px; }
-      .badge { font-size:0.65rem; padding:2px 5px; }
-      .rundown-entry { margin-bottom:24px; }
-      #page-footer { padding:20px 16px; }
-      #page-footer .footer-disclaimer { font-size:0.73rem; }
-      #page-footer .footer-copy { font-size:0.7rem; }
+    html { font-size: 15px; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; min-height: 100vh; padding: 0 0 4rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+    header .brand { display: flex; align-items: center; gap: 1rem; text-decoration: none; }
+    header .brand .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+    header .brand .logo-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    header .brand .logo-sub { font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.1rem; }
+    #last-updated { font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.3rem 0.75rem; white-space: nowrap; }
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 0; }
+    .rundown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1.5rem; overflow: hidden; }
+    .rundown-card .card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .rundown-card .card-date { font-size: 0.95rem; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; }
+    .rundown-card .card-badge { font-size: 0.72rem; font-family: var(--font-mono); background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 0.15rem 0.5rem; font-weight: 600; letter-spacing: 0.04em; }
+    details { border-bottom: 1px solid var(--border); }
+    details:last-child { border-bottom: none; }
+    summary { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.25rem; cursor: pointer; user-select: none; font-weight: 600; font-size: 0.875rem; color: var(--text); letter-spacing: 0.02em; text-transform: uppercase; list-style: none; transition: background 0.15s; }
+    summary::-webkit-details-marker { display: none; }
+    summary:hover { background: var(--surface2); }
+    summary::after { content: '›'; margin-left: auto; font-size: 1.1rem; color: var(--text-dim); transition: transform 0.2s; display: inline-block; }
+    details[open] summary::after { transform: rotate(90deg); }
+    .section-icon { font-size: 1rem; opacity: 0.85; }
+    .section-body { padding: 1rem 1.25rem 1.25rem; }
+    .stocks-table { width: 100%; border-collapse: collapse; font-size: 0.835rem; }
+    .stocks-table thead tr { border-bottom: 1px solid var(--border); }
+    .stocks-table th { text-align: left; padding: 0.4rem 0.75rem; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+    .stocks-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .stocks-table tbody tr:last-child td { border-bottom: none; }
+    .stocks-table tbody tr:hover { background: var(--surface2); }
+    .ticker { font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+    .up { color: var(--green); } .down { color: var(--red); } .flat { color: var(--text-muted); }
+    .pill { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+    .pill.up { background: rgba(52,211,153,0.12); color: var(--green); }
+    .pill.down { background: rgba(248,113,113,0.12); color: var(--red); }
+    .pill.flat { background: var(--surface2); color: var(--text-muted); }
+    .prose { font-size: 0.88rem; color: var(--text); line-height: 1.75; }
+    .prose p + p { margin-top: 0.65rem; }
+    .prose strong { color: var(--text); font-weight: 600; }
+    .levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .level-item { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.65rem 0.85rem; }
+    .level-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 0.2rem; }
+    .level-value { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; }
+    .level-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .stocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 0.75rem; }
+    .stock-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; }
+    .stock-card .card-ticker { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 0.25rem; }
+    .stock-card .card-catalyst { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem; font-weight: 600; }
+    .stock-card .card-note { font-size: 0.83rem; line-height: 1.6; }
+    .watchlist-badge { font-size: 0.68rem; color: var(--accent); font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.03em; }
+    .pill-action-up { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: rgba(52,211,153,0.12); color: var(--green); }
+    .pill-action-down { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: rgba(248,113,113,0.12); color: var(--red); }
+    .pill-action-flat { display: inline-block; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: var(--surface2); color: var(--text-muted); }
+    .warning-banner { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--yellow); }
+    footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: 2.5rem; padding: 1.5rem 2rem; text-align: center; }
+    .footer-disclaimer { font-size: 0.78rem; color: var(--text-muted); max-width: 720px; margin: 0 auto 0.5rem; line-height: 1.7; }
+    .footer-disclaimer strong { color: var(--yellow); }
+    .footer-copy { font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono); }
+    @media (max-width: 600px) {
+      header { padding: 1rem; flex-wrap: wrap; }
+      main { padding: 1rem 0.75rem 0; }
+      .stocks-table { font-size: 0.77rem; }
+      .stocks-table th, .stocks-table td { padding: 0.45rem 0.4rem; }
+      .stocks-grid { grid-template-columns: 1fr; }
     }
-    @media (min-width:641px) and (max-width:900px) {
-      #page-header { padding:16px 20px; }
-      #main { padding:24px 16px; }
-      .stock-grid { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
-      .section-body { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    }
-  </style>
+</style>
 </head>
 <body>
-  <header id="page-header">
-    <a href="../market_rundown.html" id="logo">
-      <svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="18" cy="18" r="17" fill="#1e2330" stroke="#2a2f3d" stroke-width="1.5"/>
-        <rect x="8"  y="20" width="4" height="8"  rx="1" fill="#f75f5f"/>
-        <line x1="10" y1="18" x2="10" y2="20" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="10" y1="28" x2="10" y2="30" stroke="#f75f5f" stroke-width="1.5" stroke-linecap="round"/>
-        <rect x="16" y="14" width="4" height="10" rx="1" fill="#3ecf6e"/>
-        <line x1="18" y1="11" x2="18" y2="14" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="18" y1="24" x2="18" y2="27" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <rect x="24" y="11" width="4" height="12" rx="1" fill="#3ecf6e"/>
-        <line x1="26" y1="8"  x2="26" y2="11" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="26" y1="23" x2="26" y2="26" stroke="#3ecf6e" stroke-width="1.5" stroke-linecap="round"/>
-        <polyline points="10,24 18,17 26,13" stroke="#4f8ef7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.7"/>
+  <header>
+    <a class="brand" href="../market_rundown.html">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="24" cy="24" r="23" fill="#1e2330" stroke="#2a3044" stroke-width="1.5"/>
+        <rect x="10" y="27" width="6" height="10" rx="1" fill="#f87171"/>
+        <line x1="13" y1="24" x2="13" y2="27" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13" y1="37" x2="13" y2="40" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="21" y="18" width="6" height="13" rx="1" fill="#34d399"/>
+        <line x1="24" y1="14" x2="24" y2="18" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="31" x2="24" y2="35" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <rect x="32" y="13" width="6" height="16" rx="1" fill="#34d399"/>
+        <line x1="35" y1="9"  x2="35" y2="13" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="35" y1="29" x2="35" y2="33" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+        <polyline points="13,32 24,23 35,18" stroke="#4a9eff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.8"/>
       </svg>
-      <div id="logo-text">
+      <div class="logo-text">
         <span class="logo-title">Market Rundown</span>
         <span class="logo-sub">Daily Pre-Market Brief</span>
       </div>
     </a>
-    <nav class="nav-links">
-      <a href="index.html">📁 All Archives</a>
+    <div id="last-updated">
+      <a href="index.html" style="margin-right:1rem;">📁 Archive</a>
       <a href="../market_rundown.html">⬅ Latest</a>
-    </nav>
+    </div>
   </header>
-  <main id="main">
-    <section class="rundown-entry" data-date="2026-04-28">
-  <div class="rundown-entry-header">
-    <h2>📅 Tuesday, April 28, 2026</h2>
-    <span class="entry-meta">Generated 5:05 PM ET &nbsp;·&nbsp; Pre-Market</span>
-  </div>
-  <details open>
-    <summary>🌍 MACRO OVERVIEW</summary>
-    <div class="section-body">
-      <ul>
-        <li><strong>U.S. Stock Futures</strong>: Futures for the S&P 500 and Nasdaq 100 are stable following a wave of earnings reports. <em><a href="https://www.cnbc.com">via CNBC</a></em></li>
-        <li><strong>Global Markets</strong>: Asian markets are mixed as investors evaluate China's support for domestic businesses and U.S. trade negotiations. <em><a href="https://www.cnbc.com">via CNBC</a></em></li>
-        <li><strong>Federal Reserve Commentary</strong>: Fed Chair Powell indicates rates will remain steady pending tariff impact clarity. <em><a href="https://www.cnbc.com">via CNBC</a></em></li>
-        <li><strong>Geopolitical Events</strong>: Optimism grows around a U.S.-brokered ceasefire between Israel and Iran. <em><a href="https://www.cnbc.com">via CNBC</a></em></li>
-        <li><strong>Commodities</strong>: Oil prices dip due to U.S.-China trade tensions; Brent Crude at $65.61 per barrel. <em><a href="https://www.cnbc.com">via CNBC</a></em></li>
-      </ul>
-    </div>
-  </details>
-  <details>
-    <summary>📆 ECONOMIC CALENDAR</summary>
-    <div class="section-body">
-      <table class="calendar-table">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Time (ET)</th>
-            <th>Expected</th>
-            <th>Prior</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Employment Situation of Veterans</td>
-            <td>10:00 AM</td>
-            <td>N/A</td>
-            <td>N/A</td>
-            <td>Not a major indicator</td>
-          </tr>
-          <tr>
-            <td>Fed Closed Meeting</td>
-            <td>10:00 AM</td>
-            <td>N/A</td>
-            <td>N/A</td>
-            <td>Discussing monetary policy</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </details>
-  <details>
-    <summary>📊 EARNINGS REPORTS</summary>
-    <div class="section-body">
-      <table class="ratings-table">
-        <thead>
-          <tr>
-            <th>Ticker</th>
-            <th>Result</th>
-            <th>vs. Estimate</th>
-            <th>Reaction</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="ticker-cell">⭐ WDC</td>
-            <td>$9.94 EPS</td>
-            <td>N/A</td>
-            <td>-2.46%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ MU</td>
-            <td>$21.18 EPS</td>
-            <td>N/A</td>
-            <td>-3.88%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ LITE</td>
-            <td>$3.40 EPS</td>
-            <td>N/A</td>
-            <td>-7.92%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ CIEN</td>
-            <td>$1.57 EPS</td>
-            <td>N/A</td>
-            <td>-6.47%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ TSLA</td>
-            <td>$1.09 EPS</td>
-            <td>N/A</td>
-            <td>-0.68%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ COHR</td>
-            <td>$1.03 EPS</td>
-            <td>N/A</td>
-            <td>-5.43%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ CRDO</td>
-            <td>$1.82 EPS</td>
-            <td>N/A</td>
-            <td>-8.07%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ PLTR</td>
-            <td>$0.42 EPS</td>
-            <td>N/A</td>
-            <td>-1.35%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ TER</td>
-            <td>$2.74 EPS</td>
-            <td>N/A</td>
-            <td>-5.43%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ LRCX</td>
-            <td>$5.37 EPS</td>
-            <td>N/A</td>
-            <td>-3.17%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ GLW</td>
-            <td>$1.58 EPS</td>
-            <td>N/A</td>
-            <td>-8.89%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ AAOI</td>
-            <td>-$3.44 EPS</td>
-            <td>N/A</td>
-            <td>-5.85%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ VRT</td>
-            <td>$3.98 EPS</td>
-            <td>N/A</td>
-            <td>-5.40%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ TSM</td>
-            <td>N/A</td>
-            <td>N/A</td>
-            <td>-3.14%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ CLS</td>
-            <td>$8.25 EPS</td>
-            <td>N/A</td>
-            <td>-14.37%</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ GOOGL</td>
-            <td>$10.13 EPS</td>
-            <td>N/A</td>
-            <td>-0.15%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </details>
-  <details>
-    <summary>🔬 ANALYST RATINGS</summary>
-    <div class="section-body">
-      <table class="ratings-table">
-        <thead>
-          <tr>
-            <th>Ticker</th>
-            <th>Firm</th>
-            <th>Action</th>
-            <th>Rating</th>
-            <th>Price Target</th>
-            <th>Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="ticker-cell">⭐ LITE</td>
-            <td>Craig-Hallum</td>
-            <td>Upgrade</td>
-            <td>Buy</td>
-            <td>N/A</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ NFLX</td>
-            <td>Seaport Research</td>
-            <td>Upgrade</td>
-            <td>Buy</td>
-            <td>$955</td>
-            <td>Operational tailwinds</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ AMD</td>
-            <td>Mizuho</td>
-            <td>Downgrade</td>
-            <td>Neutral</td>
-            <td>$270</td>
-            <td>Lowered from $315</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">⭐ NKE</td>
-            <td>TD Cowen</td>
-            <td>Downgrade</td>
-            <td>Market Perform</td>
-            <td>$104</td>
-            <td>Down from $129</td>
-          </tr>
-          <tr>
-            <td class="ticker-cell">NDAQ</td>
-            <td>Redburn</td>
-            <td>Initiation</td>
-            <td>Neutral</td>
-            <td>N/A</td>
-            <td>-</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </details>
-  <details open>
-    <summary>🎯 STOCKS IN PLAY</summary>
-    <div class="section-body">
-      <div class="stock-grid">
-        <div class="stock-card">
-          <div class="ticker">WDC</div>
-          <div class="catalyst">Stake Reduction</div>
-          <div class="note">WT Asset Management Ltd reduced holdings.</div>
+  <main>
+    <div id="rundowns">
+      
+      <!-- ══════════════════════════════════════════════════════════════
+           ENTRY: 2026-04-28
+           ══════════════════════════════════════════════════════════════ -->
+      <section class="rundown-card" data-date="2026-04-28">
+        <div class="card-header">
+          <span class="card-date">Tuesday, April 28, 2026</span>
+          <span class="card-badge">PRE-MARKET · TUESDAY</span>
         </div>
-        <div class="stock-card">
-          <div class="ticker">MU</div>
-          <div class="catalyst">Insider Selling</div>
-          <div class="note">Decline following insider selling.</div>
-        </div>
-        <div class="stock-card">
-          <div class="ticker">CRDO</div>
-          <div class="catalyst">Analyst Upgrade</div>
-          <div class="note">Stock rose 5.5% after upgrade.</div>
-        </div>
-        <div class="stock-card">
-          <div class="ticker">NFLX</div>
-          <div class="catalyst">Analyst Upgrade</div>
-          <div class="note">Shares rose 1.3% after upgrade.</div>
-        </div>
-      </div>
+        <details open>
+          <summary><span class="section-icon">🌐</span> Macro Overview</summary>
+          <div class="section-body"><div class="prose"><ul>
+<li><strong>U.S. Stock Futures</strong>: Futures for the S&amp;P 500 and Nasdaq 100 are stable following a wave of earnings reports. <em>via <a href="https://www.cnbc.com">CNBC</a></em></li>
+<li><strong>Global Markets</strong>: Asian markets are mixed as investors evaluate China's support for domestic businesses and U.S. trade negotiations. <em>via <a href="https://www.cnbc.com">CNBC</a></em></li>
+<li><strong>Federal Reserve Commentary</strong>: Fed Chair Powell indicates rates will remain steady pending tariff impact clarity. <em>via <a href="https://www.cnbc.com">CNBC</a></em></li>
+<li><strong>Geopolitical Events</strong>: Optimism grows around a U.S.-brokered ceasefire between Israel and Iran. <em>via <a href="https://www.cnbc.com">CNBC</a></em></li>
+<li><strong>Commodities</strong>: Oil prices dip due to U.S.-China trade tensions; Brent Crude at $65.61 per barrel. <em>via <a href="https://www.cnbc.com">CNBC</a></em></li>
+</ul></div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">📅</span> Economic Calendar</summary>
+          <div class="section-body"><div class="prose"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Time (ET)</th>
+<th>Expected</th>
+<th>Prior</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Employment Situation of Veterans</td>
+<td>10:00 AM</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>Not a major indicator</td>
+</tr>
+<tr>
+<td>Fed Closed Meeting</td>
+<td>10:00 AM</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>Discussing monetary policy</td>
+</tr>
+</tbody>
+</table></div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">📣</span> Earnings Reports</summary>
+          <div class="section-body"><table class="stocks-table" style="margin-bottom:1.1rem;">
+<thead>
+<tr>
+<th style="text-align:left">Ticker</th>
+<th style="text-align:left">Result</th>
+<th style="text-align:left">vs. Estimate</th>
+<th style="text-align:left">Reaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">⭐ WDC</td>
+<td style="text-align:left">$9.94 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-2.46%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ MU</td>
+<td style="text-align:left">$21.18 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-3.88%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ LITE</td>
+<td style="text-align:left">$3.40 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-7.92%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ CIEN</td>
+<td style="text-align:left">$1.57 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-6.47%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ TSLA</td>
+<td style="text-align:left">$1.09 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-0.68%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ COHR</td>
+<td style="text-align:left">$1.03 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-5.43%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ CRDO</td>
+<td style="text-align:left">$1.82 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-8.07%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ PLTR</td>
+<td style="text-align:left">$0.42 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-1.35%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ TER</td>
+<td style="text-align:left">$2.74 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-5.43%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ LRCX</td>
+<td style="text-align:left">$5.37 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-3.17%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ GLW</td>
+<td style="text-align:left">$1.58 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-8.89%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ AAOI</td>
+<td style="text-align:left">-$3.44 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-5.85%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ VRT</td>
+<td style="text-align:left">$3.98 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-5.40%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ TSM</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-3.14%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ CLS</td>
+<td style="text-align:left">$8.25 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-14.37%</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ GOOGL</td>
+<td style="text-align:left">$10.13 EPS</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-0.15%</td>
+</tr>
+</tbody>
+</table></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">🏷️</span> Analyst Ratings</summary>
+          <div class="section-body"><table class="stocks-table" style="margin-bottom:1.1rem;">
+<thead>
+<tr>
+<th style="text-align:left">Ticker</th>
+<th style="text-align:left">Firm</th>
+<th style="text-align:left">Action</th>
+<th style="text-align:left">Rating</th>
+<th style="text-align:left">Price Target</th>
+<th style="text-align:left">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">⭐ LITE</td>
+<td style="text-align:left">Craig-Hallum</td>
+<td style="text-align:left">Upgrade</td>
+<td style="text-align:left">Buy</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ NFLX</td>
+<td style="text-align:left">Seaport Research</td>
+<td style="text-align:left">Upgrade</td>
+<td style="text-align:left">Buy</td>
+<td style="text-align:left">$955</td>
+<td style="text-align:left">Operational tailwinds</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ AMD</td>
+<td style="text-align:left">Mizuho</td>
+<td style="text-align:left">Downgrade</td>
+<td style="text-align:left">Neutral</td>
+<td style="text-align:left">$270</td>
+<td style="text-align:left">Lowered from $315</td>
+</tr>
+<tr>
+<td style="text-align:left">⭐ NKE</td>
+<td style="text-align:left">TD Cowen</td>
+<td style="text-align:left">Downgrade</td>
+<td style="text-align:left">Market Perform</td>
+<td style="text-align:left">$104</td>
+<td style="text-align:left">Down from $129</td>
+</tr>
+<tr>
+<td style="text-align:left">NDAQ</td>
+<td style="text-align:left">Redburn</td>
+<td style="text-align:left">Initiation</td>
+<td style="text-align:left">Neutral</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">-</td>
+</tr>
+</tbody>
+</table></div>
+        </details>
+        <details open>
+          <summary><span class="section-icon">🎯</span> Stocks in Play</summary>
+          <div class="section-body"><div class="prose"><ul>
+<li><strong>WDC</strong> | Stake Reduction | WT Asset Management Ltd reduced holdings.</li>
+<li><strong>MU</strong> | Insider Selling | Decline following insider selling.</li>
+<li><strong>CRDO</strong> | Analyst Upgrade | Stock rose 5.5% after upgrade.</li>
+<li><strong>NFLX</strong> | Analyst Upgrade | Shares rose 1.3% after upgrade.</li>
+</ul></div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">🧭</span> Market Themes</summary>
+          <div class="section-body"><div class="prose"><ol>
+<li><strong>Active ETF Adoption</strong>: Active ETFs capture significant inflows, indicating a shift towards active management. <em>via <a href="https://www.etf.com">ETF.com</a></em></li>
+<li><strong>Record ETF Inflows</strong>: $36.8 billion added to U.S.-listed ETFs last week, showing investor resilience. <em>via <a href="https://www.etf.com">ETF.com</a></em></li>
+<li><strong>Sector ETF Movements</strong>: SPY sees inflows, XLE outflows, reflecting sector sentiment shifts. <em>via <a href="https://www.etf.com">ETF.com</a></em></li>
+<li><strong>Money Market ETF Growth</strong>: Ultra-short-term bond ETFs gain popularity for liquidity and yield. <em>via <a href="https://www.etf.com">ETF.com</a></em></li>
+</ol></div></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">📋</span> Secondary Names</summary>
+          <div class="section-body"><ul>
+<li><strong>Smithfield Foods (SFD)</strong>: Expected EPS $0.59 on $3.71B revenue.</li>
+<li><strong>BP (BP)</strong>: Estimated EPS $0.88 on $48.30B revenue.</li>
+<li><strong>Barclays (BCS)</strong>: Projected EPS $0.75 on $11.19B revenue.</li>
+<li><strong>Novartis (NVS)</strong>: Estimated EPS $2.07 on $13.50B revenue.</li>
+<li><strong>NexPoint Residential Trust (NXRT)</strong>: Likely EPS $0.57 on $63.27M revenue.</li>
+</ul></div>
+        </details>
+        <details>
+          <summary><span class="section-icon">🗓️</span> Week Ahead</summary>
+          <div class="section-body"><table class="stocks-table">
+<thead>
+<tr>
+<th>Date</th>
+<th>Event/Ticker</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apr 29</td>
+<td>Fed Interest Rate Decision</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Apr 29</td>
+<td>Bank of Canada Rate Decision</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Apr 30</td>
+<td>ECB Rate Decision</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Apr 30</td>
+<td>Bank of England Rate Decision</td>
+<td>-</td>
+</tr>
+<tr>
+<td>May 5</td>
+<td>RBA Rate Decision</td>
+<td>-</td>
+</tr>
+</tbody>
+</table></div>
+        </details>
+      </section>
     </div>
-  </details>
-  <details>
-    <summary>📈 MARKET THEMES</summary>
-    <div class="section-body">
-      <ul>
-        <li><strong>Active ETF Adoption</strong>: Active ETFs capture significant inflows, indicating a shift towards active management. <em><a href="https://www.etf.com">via ETF.com</a></em></li>
-        <li><strong>Record ETF Inflows</strong>: $36.8 billion added to U.S.-listed ETFs last week, showing investor resilience. <em><a href="https://www.etf.com">via ETF.com</a></em></li>
-        <li><strong>Sector ETF Movements</strong>: SPY sees inflows, XLE outflows, reflecting sector sentiment shifts. <em><a href="https://www.etf.com">via ETF.com</a></em></li>
-        <li><strong>Money Market ETF Growth</strong>: Ultra-short-term bond ETFs gain popularity for liquidity and yield. <em><a href="https://www.etf.com">via ETF.com</a></em></li>
-      </ul>
-    </div>
-  </details>
-  <details>
-    <summary>📋 SECONDARY NAMES</summary>
-    <div class="section-body">
-      <ul>
-        <li><strong>Smithfield Foods (SFD)</strong>: Expected EPS $0.59 on $3.71B revenue.</li>
-        <li><strong>BP (BP)</strong>: Estimated EPS $0.88 on $48.30B revenue.</li>
-        <li><strong>Barclays (BCS)</strong>: Projected EPS $0.75 on $11.19B revenue.</li>
-        <li><strong>Novartis (NVS)</strong>: Estimated EPS $2.07 on $13.50B revenue.</li>
-        <li><strong>NexPoint Residential Trust (NXRT)</strong>: Likely EPS $0.57 on $63.27M revenue.</li>
-      </ul>
-    </div>
-  </details>
-  <details>
-    <summary>🗓 WEEK AHEAD</summary>
-    <div class="section-body">
-      <table class="calendar-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Event/Ticker</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Apr 29</td>
-            <td>Fed Interest Rate Decision</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>Apr 29</td>
-            <td>Bank of Canada Rate Decision</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>Apr 30</td>
-            <td>ECB Rate Decision</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>Apr 30</td>
-            <td>Bank of England Rate Decision</td>
-            <td>-</td>
-          </tr>
-          <tr>
-            <td>May 5</td>
-            <td>RBA Rate Decision</td>
-            <td>-</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </details>
-</section>
+    <footer>
+      <p class="footer-disclaimer">
+        <strong>⚠️ For market research and informational purposes only.</strong>
+        This briefing does not constitute financial advice, investment recommendations, or an offer to buy or sell any security.
+        All content is aggregated from publicly available sources and is provided as-is without warranty of accuracy or completeness.
+        Past market performance is not indicative of future results. Always conduct your own due diligence and consult a qualified
+        financial advisor before making any investment decisions.
+      </p>
+      <p class="footer-copy">Daily Market Rundown &nbsp;·&nbsp; Generated automatically from public sources</p>
+    </footer>
   </main>
-  <footer id="page-footer">
-    <p class="footer-disclaimer">
-      <strong>⚠️ For market research and informational purposes only.</strong>
-      This briefing does not constitute financial advice, investment recommendations, or an offer to buy or sell any security.
-      All content is aggregated from publicly available sources and is provided as-is without warranty of accuracy or completeness.
-      Past market performance is not indicative of future results. Always conduct your own due diligence and consult a qualified
-      financial advisor before making any investment decisions.
-    </p>
-    <p class="footer-copy">© 2026 Rajeev Piyare &nbsp;·&nbsp; Daily Market Rundown &nbsp;·&nbsp; All rights reserved.</p>
-  </footer>
 </body>
 </html>

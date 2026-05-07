@@ -19,7 +19,6 @@ CT = ZoneInfo("America/Chicago")
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DASHBOARD_FILE = os.path.join(SCRIPT_DIR, "market_rundown.html")
 MAX_ENTRIES = 7
-PLACEHOLDER = "<!-- RUNDOWNS_PLACEHOLDER -->"
 
 # ── CSS (matches sample_market_rundown.html design) ──────────────────────────
 CSS = """
@@ -861,7 +860,7 @@ def build_or_update(md_file: str):
 
     combined = new_entry + ("\n" + existing_entries if existing_entries else "")
     html = SHELL.format(css=CSS, timestamp=timestamp,
-                        placeholder=combined + "\n      " + PLACEHOLDER)
+                        placeholder=combined)
     with open(DASHBOARD_FILE, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"✅ Built {DASHBOARD_FILE} — {os.path.basename(md_file)} at top")
